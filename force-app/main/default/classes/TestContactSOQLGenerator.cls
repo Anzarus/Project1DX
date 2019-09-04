@@ -26,12 +26,24 @@ private class TestContactSOQLGenerator {
     }
 
     @IsTest
-    static void testException(){
-
+    static void testException() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                ContactSOQLGenerator.generateContactSOQLWithoutWhere();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
     }
 
-    @IsTest
-    static void testNoAccessibleField(){
+    private static User getTestUser() {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Test' LIMIT 1];
+        User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
+                Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
+                EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,
+                TimeZoneSidKey = 'America/Los_Angeles');
 
+        return testUser;
     }
 }

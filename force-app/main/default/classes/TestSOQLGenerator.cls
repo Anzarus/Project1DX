@@ -39,4 +39,28 @@ private class TestSOQLGenerator {
                 ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
                 ' CleanStatus FROM Contact ', resultContactSOQL);
     }
+
+    @IsTest
+    static void testException() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType);
+
+                soqlGenerator.generateSOQL();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    private static User getTestUser() {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Test' LIMIT 1];
+        User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
+                Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
+                EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,
+                TimeZoneSidKey = 'America/Los_Angeles');
+
+        return testUser;
+    }
 }

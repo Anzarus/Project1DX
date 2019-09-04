@@ -25,6 +25,8 @@ public with sharing class SOQLBuilderWithoutThrowingExceptions implements SOQLBu
         for (Integer i = 0; i < sObjectFields.size() - 1; i++) {
             if (sObjectFields.get(i).getDescribe().isAccessible()) {
                 addFieldToSOQL(i, ', ');
+            }else {
+                throw new NoAccessException();
             }
         }
         addFieldToSOQL(sObjectFields.size() - 1,' ');

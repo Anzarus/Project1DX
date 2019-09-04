@@ -19,13 +19,14 @@ public with sharing class SOQLGenerator {
             if (fieldsByStrings.get(key).getDescribe().isAccessible()) {
                 generatedSOQL += fieldsByStrings.get(key) + ', ';
             } else {
+                throw new NoAccessException();
                 /*throw new Exception('Access denied to this field');*/
             }//todo exception case
         }
 
-        if (generatedSOQL == '') /*throw new Exception('Access denied to all fields');*/ {
+        /*if (generatedSOQL == '') *//*throw new Exception('Access denied to all fields');*//* {
             return '';
-        }//todo error case
+        }*/
 
         return 'SELECT ' + generatedSOQL.substring(0, generatedSOQL.length() - 2) +
                 ' FROM ' + sObjectType + ' ';
