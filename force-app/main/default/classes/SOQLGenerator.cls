@@ -5,28 +5,33 @@
 public with sharing class SOQLGenerator {
 
     private SObjectType sObjectType;
+    private Boolean isStrict = false;
 
     public SOQLGenerator(SObjectType sObjectType) {
         this.sObjectType = sObjectType;
     }
 
-    public String generateSOQL(){
+    public SOQLGenerator(SObjectType sObjectType, Boolean isStrict) {
+        this.sObjectType = sObjectType;
+        this.isStrict = isStrict;
+    }
+
+    public void setIsStrict(Boolean isStrict){
+        this.isStrict = isStrict;
+    }
+
+    public String generateSOQL() {
         Map<String, Schema.SObjectField> fieldsByStrings = sObjectType.getDescribe().fields.getMap();
 
         String generatedSOQL = '';
 
-        for (String key : fieldsByStrings.keySet()){
+        for (String key : fieldsByStrings.keySet()) {
             if (fieldsByStrings.get(key).getDescribe().isAccessible()) {
                 generatedSOQL += fieldsByStrings.get(key) + ', ';
-            } else {
+            } else if (isStrict) {
                 throw new NoAccessException();
-                /*throw new Exception('Access denied to this field');*/
-            }//todo exception case
+            }
         }
-
-        /*if (generatedSOQL == '') *//*throw new Exception('Access denied to all fields');*//* {
-            return '';
-        }*/
 
         return 'SELECT ' + generatedSOQL.substring(0, generatedSOQL.length() - 2) +
                 ' FROM ' + sObjectType + ' ';

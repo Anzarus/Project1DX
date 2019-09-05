@@ -5,6 +5,7 @@
 public interface SOQLBuilder {
 
     void reset();
+    void setIsStrict(Boolean isStrict);
     void setSelect();
     void setFields();
     void setFrom();

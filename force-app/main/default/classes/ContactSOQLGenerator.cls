@@ -4,7 +4,19 @@
 
 public with sharing class ContactSOQLGenerator {
 
-    public static String generateContactSOQLWithoutWhere() {
+    private Boolean isStrict = false;
+
+    public ContactSOQLGenerator() {}
+
+    public ContactSOQLGenerator(Boolean isStrict) {
+        this.isStrict = isStrict;
+    }
+
+    public void setIsStrict(Boolean isStrict){
+        this.isStrict = isStrict;
+    }
+
+    public String generateContactSOQLWithoutWhere() {
 
         Map<String, Schema.SObjectField> fieldsByStrings = Schema.SObjectType.Contact.fields.getMap();
 
@@ -13,15 +25,10 @@ public with sharing class ContactSOQLGenerator {
         for (String key : fieldsByStrings.keySet()) {
             if (fieldsByStrings.get(key).getDescribe().isAccessible()) {
                 generatedSOQL += fieldsByStrings.get(key) + ', ';
-            } else {
+            } else if (isStrict) {
                 throw new NoAccessException();
-                /*throw new Exception('Access denied to this field');*/
-            }//todo exception case
+            }
         }
-
-        /*if (generatedSOQL == '') *//*throw new Exception('Access denied to all fields');*//* {
-            throw new NoAccessException();
-        }*/
 
         return 'SELECT ' + generatedSOQL.substring(0, generatedSOQL.length() - 2) +
                 ' FROM Contact ';

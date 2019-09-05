@@ -7,7 +7,9 @@ private class TestContactSOQLGenerator {
     @IsTest
     static void testGettingContactSOQL() {
 
-        String resultSOQL = ContactSOQLGenerator.generateContactSOQLWithoutWhere();
+        ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
+
+        String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
 
         System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
                 ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
@@ -26,11 +28,29 @@ private class TestContactSOQLGenerator {
     }
 
     @IsTest
-    static void testException() {
+    static void testExceptionSettingStrictRulesViaConstructor(){
+        User user = getTestUser();
+        System.runAs(user){
+            try {
+                ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
+
+                contactSOQLGenerator.generateContactSOQLWithoutWhere();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionSettingStrictRulesViaMethod() {
         User user = getTestUser();
         System.runAs(user) {
             try {
-                ContactSOQLGenerator.generateContactSOQLWithoutWhere();
+                ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
+
+                contactSOQLGenerator.setIsStrict(true);
+
+                contactSOQLGenerator.generateContactSOQLWithoutWhere();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }

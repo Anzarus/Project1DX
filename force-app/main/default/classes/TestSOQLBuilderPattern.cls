@@ -5,14 +5,14 @@
 @IsTest
 private class TestSOQLBuilderPattern {
     @IsTest
-    static void testGeneratingSOQLForProduct2ViaBuilder () {
+    static void testGeneratingSOQLForProduct2() {
         SObjectType sObjectType = Product2.SObjectType;
         List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
 
         SOQLDirector director = new SOQLDirector();
-        SOQLBuilderWithoutThrowingExceptions builder = new SOQLBuilderWithoutThrowingExceptions(sObjectType, sObjectFields);
+        SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
 
-        director.generateSOQLQuery(builder);
+        director.generateSOQLQueryWithoutStrictAccessRules(builder);
 
         System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
                 ' IsActive, CreatedDate, CreatedById, LastModifiedDate,' +
@@ -23,14 +23,14 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    static void testGeneratingSOQLForContactViaBuilder(){
+    static void testGeneratingSOQLForContact() {
         SObjectType sObjectType = Contact.SObjectType;
         List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
 
         SOQLDirector director = new SOQLDirector();
-        SOQLBuilderWithoutThrowingExceptions builder = new SOQLBuilderWithoutThrowingExceptions(sObjectType, sObjectFields);
+        SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
 
-        director.generateSOQLQuery(builder);
+        director.generateSOQLQueryWithoutStrictAccessRules(builder);
 
         System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
                 ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
@@ -49,7 +49,7 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    static void testException() {
+    static void testExceptionOnSettingStrictRulesViaDirector() {
         User user = getTestUser();
         System.runAs(user) {
             try {
@@ -57,9 +57,47 @@ private class TestSOQLBuilderPattern {
                 List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
 
                 SOQLDirector director = new SOQLDirector();
-                SOQLBuilderWithoutThrowingExceptions builder = new SOQLBuilderWithoutThrowingExceptions(sObjectType, sObjectFields);
+                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
 
-                director.generateSOQLQuery(builder);
+                director.generateSOQLQueryWithStrictAccessRules(builder);
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnSettingStrictRulesViaBuilderConstructor(){
+        User user = getTestUser();
+        System.runAs(user){
+            try {
+                SObjectType sObjectType = Contact.SObjectType;
+                List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
+
+                SOQLDirector director = new SOQLDirector();
+                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields, true);
+
+                director.generateSOQLQueryWithoutStrictAccessRules(builder);
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnSettingStrictRulesViaBuilderMethod(){
+        User user = getTestUser();
+        System.runAs(user){
+            try {
+                SObjectType sObjectType = Contact.SObjectType;
+                List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
+
+                SOQLDirector director = new SOQLDirector();
+                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
+
+                builder.setIsStrict(true);
+
+                director.generateSOQLQueryWithoutStrictAccessRules(builder);
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }

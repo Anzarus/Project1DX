@@ -41,11 +41,27 @@ private class TestSOQLGenerator {
     }
 
     @IsTest
-    static void testException() {
+    static void testExceptionSettingStrictRulesViaConstructor(){
+        User user = getTestUser();
+        System.runAs(user){
+            try {
+                SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType, true);
+
+                soqlGenerator.generateSOQL();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionSettingStrictRulesViaMethod() {
         User user = getTestUser();
         System.runAs(user) {
             try {
-                SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType);
+                SOQLGenerator soqlGenerator = new SOQLGenerator(Product2.SObjectType);
+
+                soqlGenerator.setIsStrict(true);
 
                 soqlGenerator.generateSOQL();
             } catch (NoAccessException e) {
