@@ -9,13 +9,13 @@ private class TestOppTableController {
     static void testGettingProduct2sFromOpp() {
         List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 10, 100, 50000);
 
-        Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
+        Opportunity opportunity = [
+                SELECT Id
+                FROM Opportunity
+                LIMIT 1
+        ];
 
-        System.assertEquals([
-                SELECT Name, Price__c
-                FROM Product2
-                WHERE Id IN :product2sByIds.keySet()
-        ], product2s);
+        System.assertEquals(product2s, OppTableController.getProduct2sOfOpp(opportunity.Id));
     }
 
     @IsTest
@@ -24,20 +24,23 @@ private class TestOppTableController {
 
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
-        List<OpportunityLineItem> opportunityLineItems = [
-                SELECT Product2Id
-                FROM OpportunityLineItem
-                WHERE Product2Id IN :product2sByIds.keySet()
+        Opportunity opportunity = [
+                SELECT Id
+                FROM Opportunity
+                LIMIT 1
         ];
 
-        delete opportunityLineItems;
-
-        List<OpportunityLineItem> opportunityLineItems2 = new List<OpportunityLineItem>();
+        OppTableController.deleteProdFromOpp(opportunity.Id, product2s.get(5).Id);
 
         System.assertEquals([
                 SELECT Id
                 FROM OpportunityLineItem
                 WHERE Product2Id IN :product2sByIds.keySet()
-        ], opportunityLineItems2);
+        ], [
+                SELECT Id
+                FROM OpportunityLineItem
+                WHERE OpportunityId = :opportunity.Id
+        ]
+        );
     }
 }
