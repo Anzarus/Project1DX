@@ -4,10 +4,15 @@
 
 @IsTest
 private class TestProduct2TriggerHandler {
+    final static Integer LOW_BORDER_PRICE = 100;
+    final static Integer HIGH_BORDER_PRICE = 10000;
+
+
     @IsTest
     static void testOneProductToOneOppPriceUpdate() {
 
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 1, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 1,
+                LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
         Test.startTest();
@@ -36,7 +41,8 @@ private class TestProduct2TriggerHandler {
     @IsTest
     static void testOneProductToManyOppPriceUpdate() {
 
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(200, 1, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(200, 1,
+                LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
         Test.startTest();
@@ -66,7 +72,8 @@ private class TestProduct2TriggerHandler {
     @IsTest
     static void testManyProductToOneOppPriceUpdate() {
 
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 200, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 200,
+                LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
         Test.startTest();
@@ -99,7 +106,8 @@ private class TestProduct2TriggerHandler {
     @IsTest
     static void testManyProductToManyOppPriceUpdate() {
 
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(2, 2, 100, 500);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(20, 10,
+                LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
         Test.startTest();
@@ -131,7 +139,8 @@ private class TestProduct2TriggerHandler {
 
     @IsTest
     static void testProductUpdatePrice() {
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 1000, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 1000,
+                LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 
         Test.startTest();
@@ -166,7 +175,6 @@ private class TestProduct2TriggerHandler {
     }
 
     private static User getTestUser() {
-//        return [SELECT Id FROM User WHERE Username = 'antonuk1999@gmail.com'];
         Profile profile = [SELECT Id FROM Profile WHERE Name = 'Standard user' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
@@ -221,8 +229,10 @@ private class TestProduct2TriggerHandler {
     private static Map<Id, Double> getDifferenceOfPrices(List<Product2> product2s, Integer quantityToUpdate) {
         Map<Id, Double> differenceOfPrices = new Map<Id, Double>();
         Double diff;
+        Double unitPrice;
         for (Integer i = 0; i < quantityToUpdate; i++) {
-            diff = Decimal.valueOf(10000 * Math.random() - 5000);
+            unitPrice = product2s[i].Price__c - 1;
+            diff = Decimal.valueOf(1000 * Math.random() - unitPrice);
             product2s[i].Price__c += diff;
             differenceOfPrices.put(product2s[i].Id, diff);
         }

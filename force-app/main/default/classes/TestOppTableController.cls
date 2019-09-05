@@ -7,7 +7,7 @@ private class TestOppTableController {
 
     @IsTest
     static void testGettingProduct2sFromOpp() {
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 10, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 10, 100, 500);
 
         Opportunity opportunity = [
                 SELECT Id
@@ -20,7 +20,7 @@ private class TestOppTableController {
 
     @IsTest
     static void testDeletingProduct2sFromOpp() {
-        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 10, 100, 50000);
+        List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 10, 100, 500);
 
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
 

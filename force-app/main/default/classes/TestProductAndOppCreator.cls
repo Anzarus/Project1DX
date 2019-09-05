@@ -33,7 +33,7 @@ public class TestProductAndOppCreator {
         Product2 prod;
         for (Integer i = 0; i < prodPerOpp; i++) {
             prod = new Product2(Name = 'Test Product ' + i,
-                    Price__c = Decimal.valueOf(highBorderOfPrice * Math.random() + lowBorderOfPrice));
+                    Price__c = Decimal.valueOf(/*Integer.valueOf(*/(highBorderOfPrice - lowBorderOfPrice) * Math.random() + lowBorderOfPrice)/*)*/);
             product2s.add(prod);
         }
         return product2s;
