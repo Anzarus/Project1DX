@@ -5,61 +5,45 @@
 @IsTest
 private class TestSOQLBuilderPattern {
     @IsTest
-    static void testGeneratingSOQLForProduct2() {
+    static void testGeneratingSOQLForDifferentSObjects() {
         SObjectType sObjectType = Product2.SObjectType;
         List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
 
-        SOQLDirector director = new SOQLDirector();
-        SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
+        SOQLBuilder builder = new SOQLBuilder();
 
-        director.generateSOQLQueryWithoutStrictAccessRules(builder);
+        String productQuery = builder
+                .setFields(sObjectFields)
+                .setFrom(sObjectType)
+                .setFrom('Product2')
+                .build();
+
+        String contactQuery = builder
+                .reset()
+                .setFrom('Contact')
+                .setField(Contact.Id)
+                .setField('Contact.LastName')
+                .build();
 
         System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
                 ' IsActive, CreatedDate, CreatedById, LastModifiedDate,' +
                 ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
                 ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' Price__c, Status__c FROM Product2 ', builder.getSOQL());
+                ' Price__c, Status__c FROM Product2', productQuery);
+
+        System.assertEquals('SELECT Id, LastName FROM Contact', contactQuery);
     }
 
     @IsTest
-    static void testGeneratingSOQLForContact() {
-        SObjectType sObjectType = Contact.SObjectType;
-        List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
-
-        SOQLDirector director = new SOQLDirector();
-        SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
-
-        director.generateSOQLQueryWithoutStrictAccessRules(builder);
-
-        System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
-                ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
-                ' OtherState, OtherPostalCode, OtherCountry, OtherLatitude,' +
-                ' OtherLongitude, OtherGeocodeAccuracy, OtherAddress, MailingStreet,' +
-                ' MailingCity, MailingState, MailingPostalCode, MailingCountry,' +
-                ' MailingLatitude, MailingLongitude, MailingGeocodeAccuracy,' +
-                ' MailingAddress, Phone, Fax, MobilePhone, HomePhone, OtherPhone,' +
-                ' AssistantPhone, ReportsToId, Email, Title, Department, AssistantName,' +
-                ' LeadSource, Birthdate, Description, OwnerId, HasOptedOutOfEmail,' +
-                ' HasOptedOutOfFax, DoNotCall, CreatedDate, CreatedById, LastModifiedDate,' +
-                ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
-                ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
-                ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
-                ' CleanStatus FROM Contact ', builder.getSOQL());
-    }
-
-    @IsTest
-    static void testExceptionOnSettingStrictRulesViaDirector() {
+    static void testExceptionOnAccessToObject() {
         User user = getTestUser();
         System.runAs(user) {
             try {
-                SObjectType sObjectType = Contact.SObjectType;
-                List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
-
-                SOQLDirector director = new SOQLDirector();
-                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
-
-                director.generateSOQLQueryWithStrictAccessRules(builder);
+                SObjectType sObjectType = Product2.SObjectType;
+                new SOQLBuilder()
+                        .setField(Product2.Price__c)
+                        .setFrom(sObjectType)
+                        .build();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }
@@ -67,17 +51,14 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    static void testExceptionOnSettingStrictRulesViaBuilderConstructor(){
+    static void testExceptionOnAccessToFieldIfRulesStrict() {
         User user = getTestUser();
-        System.runAs(user){
+        System.runAs(user) {
             try {
-                SObjectType sObjectType = Contact.SObjectType;
-                List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
-
-                SOQLDirector director = new SOQLDirector();
-                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields, true);
-
-                director.generateSOQLQueryWithoutStrictAccessRules(builder);
+                new SOQLBuilder(true)
+                        .setField(Contact.Name)
+                        .setFrom(Contact.SObjectType)
+                        .build();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }
@@ -85,23 +66,30 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    static void testExceptionOnSettingStrictRulesViaBuilderMethod(){
-        User user = getTestUser();
-        System.runAs(user){
-            try {
-                SObjectType sObjectType = Contact.SObjectType;
-                List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
-
-                SOQLDirector director = new SOQLDirector();
-                SOQLBuilderUnit builder = new SOQLBuilderUnit(sObjectType, sObjectFields);
-
-                builder.setIsStrict(true);
-
-                director.generateSOQLQueryWithoutStrictAccessRules(builder);
-            } catch (NoAccessException e) {
-                System.assertEquals(e.getMessage(), e.getMessage());
-            }
+    private static void testExceptionOnSettingDifferentObjectsWithoutReset() {
+        SObjectType sObjectType = Contact.SObjectType;
+        try {
+            new SOQLBuilder()
+                    .setFrom('Account')
+                    .setFrom(sObjectType)
+                    .setField('Account.Name')
+                    .build();
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
         }
+    }
+
+    @IsTest
+    private static void testExceptionOnSettingDifferentObjectsWithout() {
+        SObjectType sObjectType = Contact.SObjectType;
+        String query = new SOQLBuilder()
+                .setFrom(sObjectType)
+                .setField('Contact.FirstName')
+                .setField('Contact.Account.Name')
+                .build();
+
+
+        System.assertEquals('SELECT Contact.FirstName, Contact.Account.Name from Contact', query);
     }
 
     private static User getTestUser() {
