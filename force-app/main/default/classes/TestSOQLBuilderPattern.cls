@@ -23,6 +23,7 @@ private class TestSOQLBuilderPattern {
                 .setFrom('Contact')
                 .setField(Contact.Id)
                 .setField('Contact.LastName')
+                .setSecurityEnforced()
                 .build();
 
         System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
@@ -32,7 +33,7 @@ private class TestSOQLBuilderPattern {
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
                 ' Price__c, Status__c FROM Product2', productQuery);
 
-        System.assertEquals('SELECT Id, Contact.LastName FROM Contact', contactQuery);
+        System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
 
     @IsTest

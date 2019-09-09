@@ -31,6 +31,11 @@ public without sharing class SOQLBuilder {
         return this;
     }
 
+    public SOQLBuilder setSecurityEnforced() {
+        this.soqlQuery += ' WITH SECURITY_ENFORCED';
+        return this;
+    }
+
     public SOQLBuilder setFields(SObjectField[] sObjectFields) {
         this.sObjectFields.addAll(sObjectFields);
         for (Integer i = 0; i < sObjectFields.size() - 1; i++) {
@@ -51,12 +56,15 @@ public without sharing class SOQLBuilder {
         Matcher matcher = pattern.matcher(field);
         if (matcher.matches() /*&& field.countMatches('.') <= 5*/) {
             Integer lastDot = field.lastIndexOf('.');
-            SObjectField sObjectField = getSObjectType(field, lastDot)
-                    .getDescribe().fields.getMap().get(field.substring(lastDot + 1));
-
-            if (sObjectField.getDescribe().isAccessible()) {
-                addFieldToQuery(field);
-            } else if (isStrict) {
+            SObjectType sObjectType = getSObjectType(field, lastDot);
+            if (sObjectType.getDescribe().isAccessible()) {
+                SObjectField sObjectField = sObjectType.getDescribe().fields.getMap().get(field.substring(lastDot + 1));
+                if (sObjectField.getDescribe().isAccessible()) {
+                    addFieldToQuery(field);
+                } else if (isStrict) {
+                    throw new NoAccessException();
+                }
+            } else {
                 throw new NoAccessException();
             }
         } else {
@@ -139,14 +147,20 @@ public without sharing class SOQLBuilder {
     private SObjectType getSObjectType(String field, Integer lastDot) {
         String objects = field.substring(0, lastDot);
         SObjectType lastObj;
-        for (String obj : objects.split('\\.')) {
+        if (field.contains('.')) {
+            String obj = objects.substringBefore('.');
+            lastObj = Schema.getGlobalDescribe().get(obj);
+        } else {
+            lastObj = Schema.getGlobalDescribe().get(objects);
+        }
+        /*for (String obj : objects.split('\\.')) {
             lastObj = Schema.getGlobalDescribe().get(obj);
             if (lastObj.getDescribe().isAccessible()) {
                 continue;
             } else if (isStrict) {
                 throw new NoAccessException();
             }
-        }
+        }*/
         return lastObj;
     }
 
