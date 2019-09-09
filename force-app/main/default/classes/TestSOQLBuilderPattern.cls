@@ -4,6 +4,7 @@
 
 @IsTest
 private class TestSOQLBuilderPattern {
+
     @IsTest
     static void testGeneratingSOQLForDifferentSObjects() {
         SObjectType sObjectType = Product2.SObjectType;
@@ -31,11 +32,87 @@ private class TestSOQLBuilderPattern {
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
                 ' Price__c, Status__c FROM Product2', productQuery);
 
-        System.assertEquals('SELECT Id, LastName FROM Contact', contactQuery);
+        System.assertEquals('SELECT Id, Contact.LastName FROM Contact', contactQuery);
     }
 
     @IsTest
-    static void testExceptionOnAccessToObject() {
+    static void testGeneratingWithStrict() {
+        SObjectType sObjectType = Contact.SObjectType;
+        String query = new SOQLBuilder(true, true)
+                .setFrom(sObjectType)
+                .setField('Contact.Account.Name')
+                .build();
+
+        System.assertEquals('SELECT Contact.Account.Name FROM Contact', query);
+    }
+
+    @IsTest
+    static void testGeneratingWithStrictAndChildToParent() {
+        SObjectType sObjectType = Contact.SObjectType;
+        String query = new SOQLBuilder(true, true)
+                .setFrom(sObjectType)
+                .setFields(new SObjectField[]{
+                        Contact.Name, Account.Name
+                })
+                .build();
+
+        System.assertEquals('SELECT Contact.Name, Account.Name FROM Contact', query);
+    }
+
+    @IsTest
+    static void testExceptionOnTypingNonValidValue() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                new SOQLBuilder(true)
+                        .setField('566sccs')
+                        .setFrom(Contact.SObjectType)
+                        .build();
+            } catch (SOQLBuilder.BuilderSOQLException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnMissedRequiredValues() {
+        try {
+            new SOQLBuilder().build();
+        } catch (SOQLBuilder.BuilderSOQLException e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnSettingDifferentObjectsWithoutResetUsingSObjectType() {
+        SObjectType sObjectType = Contact.SObjectType;
+        try {
+            new SOQLBuilder()
+                    .setFrom('Account')
+                    .setFrom(sObjectType)
+                    .setField('Account.Name')
+                    .build();
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnSettingDifferentObjectsWithoutResetUsingString() {
+        SObjectType sObjectType = Contact.SObjectType;
+        try {
+            new SOQLBuilder()
+                    .setFrom(sObjectType)
+                    .setFrom('Account')
+                    .setField('Account.Name')
+                    .build();
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnAccessToObjectUsingSObjectType() {
         User user = getTestUser();
         System.runAs(user) {
             try {
@@ -51,12 +128,44 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    static void testExceptionOnAccessToFieldIfRulesStrict() {
+    static void testExceptionOnAccessToObjectUsingString() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                new SOQLBuilder()
+                        .setField(Product2.Price__c)
+                        .setFrom('Product2')
+                        .build();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnAccessToObjectUsingStringInChildToParent() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                new SOQLBuilder(true, true)
+                        .setField('Product2.User.Alias')
+                        .setFrom('Product2')
+                        .build();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
+    }
+
+    @IsTest
+    static void testExceptionOnAccessToFieldIfRulesStrictUsingArrayOfFieldTypes() {
         User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
-                        .setField(Contact.Name)
+                        .setFields(new SObjectField[]{
+                        Contact.Name
+                })
                         .setFrom(Contact.SObjectType)
                         .build();
             } catch (NoAccessException e) {
@@ -66,30 +175,42 @@ private class TestSOQLBuilderPattern {
     }
 
     @IsTest
-    private static void testExceptionOnSettingDifferentObjectsWithoutReset() {
-        SObjectType sObjectType = Contact.SObjectType;
-        try {
-            new SOQLBuilder()
-                    .setFrom('Account')
-                    .setFrom(sObjectType)
-                    .setField('Account.Name')
-                    .build();
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+    static void testExceptionOnAccessToFieldIfRulesStrictUsingFieldType() {
+        User user = getTestUser();
+        System.runAs(user) {
+            try {
+                new SOQLBuilder(true)
+                        .setFrom(Contact.SObjectType)
+                        .setField(Contact.Name)
+                        .build();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
         }
     }
 
     @IsTest
-    private static void testExceptionOnSettingDifferentObjectsWithout() {
-        SObjectType sObjectType = Contact.SObjectType;
-        String query = new SOQLBuilder()
-                .setFrom(sObjectType)
-                .setField('Contact.FirstName')
-                .setField('Contact.Account.Name')
-                .build();
-
-
-        System.assertEquals('SELECT Contact.FirstName, Contact.Account.Name from Contact', query);
+    static void testExceptionOnAccessToFieldIfRulesStrictUsingString() {
+        User user = getTestUser();
+        insert user;
+        PermissionSet permissionSet = [
+                SELECT Id
+                FROM PermissionSet
+                WHERE Name = 'Testing_FLS_Permission_set'
+                LIMIT 1
+        ];
+        PermissionSetAssignment psa = new PermissionSetAssignment(PermissionSetId = permissionSet.Id, AssigneeId = user.Id);
+        insert psa;
+        System.runAs(user) {
+            try {
+                new SOQLBuilder(true)
+                        .setField('WorkOrder.CaseId')
+                        .setFrom(Contact.SObjectType)
+                        .build();
+            } catch (NoAccessException e) {
+                System.assertEquals(e.getMessage(), e.getMessage());
+            }
+        }
     }
 
     private static User getTestUser() {

@@ -7,20 +7,15 @@ public without sharing class SOQLBuilder {
     private String soqlQuery = 'SELECT FROM';
     private Boolean isStrict = false;
     private Boolean withChildToParent = false;
-    private List<SObjectField> sObjectFields = null;
+    private List<SObjectField> sObjectFields = new List<SObjectField>();
     private SObjectType sObjectType = null;
 
     public SOQLBuilder() {
     }
-/*
-    public SOQLBuilder(Boolean withChildToParent) {
-        this.withChildToParent = withChildToParent;
-    }*/
 
     public SOQLBuilder(Boolean isStrict) {
         this.isStrict = isStrict;
     }
-
 
     public SOQLBuilder(Boolean isStrict, Boolean withChildToParent) {
         this.isStrict = isStrict;
@@ -30,13 +25,14 @@ public without sharing class SOQLBuilder {
     public SOQLBuilder reset() {
         this.soqlQuery = 'SELECT FROM';
         this.isStrict = false;
-        this.sObjectFields = null;
+        this.withChildToParent = false;
+        this.sObjectFields = new List<SObjectField>();
         this.sObjectType = null;
         return this;
     }
 
-    public SOQLBuilder setFields(List<SObjectField> sObjectFields) {
-        this.sObjectFields = sObjectFields;
+    public SOQLBuilder setFields(SObjectField[] sObjectFields) {
+        this.sObjectFields.addAll(sObjectFields);
         for (Integer i = 0; i < sObjectFields.size() - 1; i++) {
             addFieldFromList(i);
         }
@@ -45,11 +41,8 @@ public without sharing class SOQLBuilder {
     }
 
     public SOQLBuilder setField(SObjectField field) {
-        if (field.getDescribe().isAccessible()) {
-            addFieldToQuery(String.valueOf(field));//
-        } else if (isStrict) {
-            throw new NoAccessException();
-        }
+        sObjectFields.add(field);
+        addFieldFromList(sObjectFields.size() - 1);
         return this;
     }
 
@@ -62,7 +55,7 @@ public without sharing class SOQLBuilder {
                     .getDescribe().fields.getMap().get(field.substring(lastDot + 1));
 
             if (sObjectField.getDescribe().isAccessible()) {
-                addFieldToQuery(String.valueOf(sObjectField));//
+                addFieldToQuery(field);
             } else if (isStrict) {
                 throw new NoAccessException();
             }
@@ -82,20 +75,21 @@ public without sharing class SOQLBuilder {
             }
         } else if (this.sObjectType == sObjectType) {
         } else {
-            throw new BuilderSOQLException();
+            throw new BuilderSOQLException('Setting another sObject without reset!');
         }
         return this;
     }
 
     public SOQLBuilder setFrom(String sObj) {
+        SObjectType newSObjectType = getSObjectType(sObj, sObj.length());
         if (sObjectType == null) {
-            sObjectType = getSObjectType(sObj, sObj.length());
+            sObjectType = newSObjectType;
             if (sObjectType.getDescribe().isAccessible()) {
                 soqlQuery = soqlQuery.replace('FROM', 'FROM ' + sObj);
             } else {
                 throw new NoAccessException();
             }
-        } else if (sObjectType == getSObjectType(sObj, sObj.length())) {
+        } else if (sObjectType == newSObjectType) {
         } else {
             throw new BuilderSOQLException();
         }
@@ -112,7 +106,13 @@ public without sharing class SOQLBuilder {
 
     private void addFieldFromList(Integer place) {
         if (sObjectFields.get(place).getDescribe().isAccessible()) {
-            addFieldToQuery(String.valueOf(sObjectFields.get(place)));//
+            if (withChildToParent) {
+                addFieldToQuery(String.valueOf(getSObjectType(sObjectFields.get(place))),
+                        String.valueOf(sObjectFields.get(place)));
+            } else {
+                addFieldToQuery(String.valueOf(sObjectFields.get(place)));
+            }
+
         } else if (isStrict) {
             throw new NoAccessException();
         }
@@ -127,7 +127,7 @@ public without sharing class SOQLBuilder {
         }
     }
 
-    private void addFieldToQueryWithRelation(String field, String sObj) {//todo get usage of this method
+    private void addFieldToQuery(String sObj, String field) {
         if (soqlQuery.contains(',')
                 || soqlQuery.substringBetween('SELECT', 'FROM').trim() != '') {
             soqlQuery = soqlQuery.replace(' FROM', ', ' + sObj + '.' + field + +' FROM');
@@ -137,17 +137,32 @@ public without sharing class SOQLBuilder {
     }
 
     private SObjectType getSObjectType(String field, Integer lastDot) {
-        String obj;
-        if (field.countMatches('.') > 1) {
-            String str = field.substring(0, lastDot);
-            lastDot = str.lastIndexOf('.');
-            obj = str.substring(lastDot + 1, str.length());
-        } else {
-            obj = field.substring(0, lastDot);
+        String objects = field.substring(0, lastDot);
+        SObjectType lastObj;
+        for (String obj : objects.split('\\.')) {
+            lastObj = Schema.getGlobalDescribe().get(obj);
+            if (lastObj.getDescribe().isAccessible()) {
+                continue;
+            } else if (isStrict) {
+                throw new NoAccessException();
+            }
         }
-        return Schema.getGlobalDescribe().get(obj);
+        return lastObj;
     }
 
-    private class BuilderSOQLException extends Exception {
+    private SObjectType getSObjectType(SObjectField sObjectField) {
+        Map<String, SObjectType> globalDescribe = Schema.getGlobalDescribe();
+        Map<Integer, SObjectType> objectTypesByFieldsHashes = new Map<Integer, SObjectType>();
+
+        for (String sObjectName : globalDescribe.keySet()) {
+            for (SObjectField field : globalDescribe.get(sObjectName).getDescribe().fields.getMap().values()) {
+                objectTypesByFieldsHashes.put(((Object) field).hashCode(), globalDescribe.get(sObjectName));
+            }
+        }
+
+        return objectTypesByFieldsHashes.get(((Object) sObjectField).hashCode());
+    }
+
+    public class BuilderSOQLException extends Exception {
     }
 }
