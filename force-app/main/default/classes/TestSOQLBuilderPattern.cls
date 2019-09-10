@@ -149,7 +149,7 @@ private class TestSOQLBuilderPattern {
         System.runAs(user) {
             try {
                 new SOQLBuilder(true, true)
-                        .setField('Product2.User.Alias')
+                        .setField('Product2.CreatedBy.Alias')
                         .setFrom('Product2')
                         .build();
             } catch (NoAccessException e) {

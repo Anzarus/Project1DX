@@ -24,7 +24,7 @@ private class TestContactSOQLGenerator {
                 ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
                 ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
                 ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
-                ' CleanStatus FROM Contact ', resultSOQL);
+                ' CleanStatus, IndividualId FROM Contact ', resultSOQL);
     }
 
     @IsTest

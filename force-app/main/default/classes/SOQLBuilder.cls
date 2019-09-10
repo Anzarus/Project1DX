@@ -58,12 +58,12 @@ public without sharing class SOQLBuilder {
             Integer lastDot = field.lastIndexOf('.');
             SObjectType sObjectType = getSObjectType(field, lastDot);
             if (sObjectType.getDescribe().isAccessible()) {
-                SObjectField sObjectField = sObjectType.getDescribe().fields.getMap().get(field.substring(lastDot + 1));
-                if (sObjectField.getDescribe().isAccessible()) {
+//                SObjectField sObjectField = sObjectType.getDescribe().fields.getMap().get(field.substring(lastDot + 1));
+//                if (sObjectField.getDescribe().isAccessible()) {
                     addFieldToQuery(field);
-                } else if (isStrict) {
-                    throw new NoAccessException();
-                }
+//                } else if (isStrict) {
+//                    throw new NoAccessException();
+//                }
             } else {
                 throw new NoAccessException();
             }
