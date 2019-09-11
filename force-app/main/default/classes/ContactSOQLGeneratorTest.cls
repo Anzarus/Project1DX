@@ -3,26 +3,13 @@
  */
 
 @IsTest
-private class TestSOQLGenerator {
+private class ContactSOQLGeneratorTest {
     @IsTest
-    static void testGeneratingSOQLForProduct2 () {
-        SOQLGenerator soqlGenerator = new SOQLGenerator(Product2.SObjectType);
+    static void testGettingContactSOQL() {
 
-        String resultProduct2SOQL = soqlGenerator.generateSOQL();
+        ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
 
-        System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
-                ' IsActive, CreatedDate, CreatedById, LastModifiedDate,' +
-                ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
-                ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
-                ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' Price__c, Status__c FROM Product2 ', resultProduct2SOQL);
-    }
-
-    @IsTest
-    static void testGeneratingSOQLForContact(){
-        SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType);
-
-        String resultContactSOQL = soqlGenerator.generateSOQL();
+        String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
 
         System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
                 ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
@@ -37,7 +24,7 @@ private class TestSOQLGenerator {
                 ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
                 ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
                 ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
-                ' CleanStatus, IndividualId FROM Contact ', resultContactSOQL);
+                ' CleanStatus, IndividualId FROM Contact ', resultSOQL);
     }
 
     @IsTest
@@ -45,9 +32,9 @@ private class TestSOQLGenerator {
         User user = getTestUser();
         System.runAs(user){
             try {
-                SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType, true);
+                ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
 
-                soqlGenerator.generateSOQL();
+                contactSOQLGenerator.generateContactSOQLWithoutWhere();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }
@@ -59,11 +46,11 @@ private class TestSOQLGenerator {
         User user = getTestUser();
         System.runAs(user) {
             try {
-                SOQLGenerator soqlGenerator = new SOQLGenerator(Product2.SObjectType);
+                ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
 
-                soqlGenerator.setIsStrict(true);
+                contactSOQLGenerator.setIsStrict(true);
 
-                soqlGenerator.generateSOQL();
+                contactSOQLGenerator.generateContactSOQLWithoutWhere();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }

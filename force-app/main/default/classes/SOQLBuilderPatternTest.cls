@@ -3,7 +3,7 @@
  */
 
 @IsTest
-private class TestSOQLBuilderPattern {
+private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testGeneratingSOQLForDifferentSObjects() {
@@ -31,7 +31,7 @@ private class TestSOQLBuilderPattern {
                 ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
                 ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' Price__c, Status__c FROM Product2', productQuery);
+                ' Price__c, Status__c, File_Id__c FROM Product2', productQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }

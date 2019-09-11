@@ -3,7 +3,7 @@
  */
 
 @IsTest
-private class TestOppTableController {
+private class OppTableControllerTest {
 
     @IsTest
     static void testGettingProduct2sFromOpp() {

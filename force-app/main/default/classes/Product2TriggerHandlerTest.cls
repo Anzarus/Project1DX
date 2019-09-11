@@ -3,7 +3,7 @@
  */
 
 @IsTest
-private class TestProduct2TriggerHandler {
+private class Product2TriggerHandlerTest {
     final static Integer LOW_BORDER_PRICE = 100;
     final static Integer HIGH_BORDER_PRICE = 10000;
 
