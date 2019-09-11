@@ -5,6 +5,11 @@
         <field>Opportunity.Total_Price__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Product2.File_Id__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Project 1 user permission set</label>
     <license>Salesforce</license>

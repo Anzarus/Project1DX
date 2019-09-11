@@ -10,7 +10,27 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>ContactSOQLGeneratorTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>LinkToFileInDropBoxGetter</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>LinkToFileInDropBoxGetterTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>LinkToFileInDropBoxGetterTestMock</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>OppTableController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>OppTableControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -18,7 +38,15 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>Product2FileFromDropBoxController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>Product2TriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>Product2TriggerHandlerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -26,31 +54,19 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>SOQLBuilderPatternTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SOQLGenerator</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>TestContactSOQLGenerator</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TestOppTableController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TestProduct2TriggerHandler</apexClass>
+        <apexClass>SOQLGeneratorTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>TestProductAndOppCreator</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TestSOQLBuilderPattern</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TestSOQLGenerator</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <custom>true</custom>
@@ -86,6 +102,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Product2.File_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Product2.ProductCode</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -99,6 +120,9 @@
         <field>Product2.StockKeepingUnit</field>
         <readable>true</readable>
     </fieldPermissions>
+    <layoutAssignments>
+        <layout>Product2-Product Layout</layout>
+    </layoutAssignments>
     <tabVisibilities>
         <tab>standard-Product2</tab>
         <visibility>DefaultOn</visibility>
