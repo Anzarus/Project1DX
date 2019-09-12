@@ -3,10 +3,7 @@
  */
 
 ({
-    doInit: function (cmp, event, helper) {
-    },
-
-    handleClick: function (cmp, event, helper) {
-        helper.requestLinkForFile(cmp);
+    handleDownloadClick: function (cmp, event, helper) {
+        helper.requestDownloadLinkForFile(cmp);
     }
 });

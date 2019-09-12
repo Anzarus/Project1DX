@@ -3,19 +3,21 @@
  */
 
 ({
-    requestLinkForFile: function (cmp) {
+    requestDownloadLinkForFile: function (cmp) {
         const recordId = cmp.get("v.recordId");
 
         const requestCmp = cmp.find("requestCmp");
+        const toastCmp = cmp.find("toastCmp");
 
-        const request = requestCmp.requestPromise(
+        requestCmp.requestPromise(
             "getFileForThisRecord",
             {recordId: recordId}
-        );
-
-        request.then(function (result) {
-            window.open(result.toString(), "_blank");
-            cmp.set("v.link")
+        ).then(function (result) {
+            if (result.toString().startsWith("Error")) {
+                toastCmp.showToast("Error", result, "error");
+            } else {
+                window.open(result.toString(), "_self");
+            }
         });
     }
 });

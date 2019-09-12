@@ -6,18 +6,16 @@
                 implements="flexipage:availableForAllPageTypes, force:hasRecordId"
                 controller="Product2FileFromDropBoxController">
 
-    <aura:attribute name="link" type="String" default=""/>
+    <aura:attribute name="link"
+                    type="String"
+                    default=""/>
 
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:button variant="brand"
+                      iconName="action:download"
+                      label="Download File"
+                      onclick="{!c.handleDownloadClick}"/>
 
-    <lightning:button variant="neutral" iconName="action:download" label="Download File" onclick="{!c.handleClick}"/>
-
-    <iframe sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts" content="{!v.link}"> <!--src="{!v.link}"-->
-    </iframe>
-
-    <span content="{!v.link}">{!v.link} kslkcms</span>
-
-
-    <c:RequestComponent aura:id="requestCmp" parentCmp="{!this}"/>
+    <c:RequestComponent aura:id="requestCmp"
+                        parentCmp="{!this}"/>
     <c:ShowToastComponent aura:id="toastCmp"/>
 </aura:component>

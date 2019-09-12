@@ -12,6 +12,7 @@ public class LinkToFileInDropBoxGetterTestMock implements HttpCalloutMock {
             response.setBody('{"metadata": {}, "link": "https://dl.dropboxusercontent.com/apitl/1/AKed"}');
         } else {
             response.setStatusCode(409);
+            response.setBody('Something went wrong!');
         }
         return response;
     }
