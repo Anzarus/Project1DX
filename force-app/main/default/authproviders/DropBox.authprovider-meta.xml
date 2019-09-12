@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AuthProvider xmlns="http://soap.sforce.com/2006/04/metadata">
+    <authorizeUrl>https://www.dropbox.com/oauth2/authorize</authorizeUrl>
+    <consumerKey>pyjbbniun9fagi2</consumerKey>
+    <consumerSecret>EUgKhHe4P25tj9Bn42qQIg==</consumerSecret>
+    <friendlyName>DropBox</friendlyName>
+    <includeOrgIdInIdentifier>false</includeOrgIdInIdentifier>
+    <providerType>OpenIdConnect</providerType>
+    <sendAccessTokenInHeader>true</sendAccessTokenInHeader>
+    <sendClientCredentialsInHeader>false</sendClientCredentialsInHeader>
+    <tokenUrl>https://api.dropbox.com/oauth2/token</tokenUrl>
+</AuthProvider>
