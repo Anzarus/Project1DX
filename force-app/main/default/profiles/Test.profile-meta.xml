@@ -14,15 +14,11 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>LinkToFileInDropBoxGetter</apexClass>
+        <apexClass>DropBoxConnection</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>LinkToFileInDropBoxGetterTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>LinkToFileInDropBoxGetterTestMock</apexClass>
+        <apexClass>Product2FileFromDropBoxTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>

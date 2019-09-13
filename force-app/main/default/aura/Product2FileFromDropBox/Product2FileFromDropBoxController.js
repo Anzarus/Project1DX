@@ -3,7 +3,11 @@
  */
 
 ({
+    doInit: function (cmp, event, helper) {
+        helper.checkIfProdHasFile(cmp);
+    },
+
     handleDownloadClick: function (cmp, event, helper) {
-        helper.requestDownloadLinkForFile(cmp);
+        helper.getDownloadLinkForFile(cmp);
     }
 });

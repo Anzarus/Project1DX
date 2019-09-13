@@ -6,13 +6,16 @@
                 implements="flexipage:availableForAllPageTypes, force:hasRecordId"
                 controller="Product2FileFromDropBoxController">
 
-    <aura:attribute name="link"
+    <aura:attribute name="disabled"
                     type="String"
-                    default=""/>
+                    default="true"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
 
     <lightning:button variant="brand"
                       iconName="action:download"
                       label="Download File"
+                      disabled="{!v.disabled}"
                       onclick="{!c.handleDownloadClick}"/>
 
     <c:RequestComponent aura:id="requestCmp"

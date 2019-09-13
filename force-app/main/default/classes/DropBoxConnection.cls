@@ -2,15 +2,9 @@
  * Created by AntonAntoniuk on 11.09.2019.
  */
 
-public with sharing class LinkToFileInDropBoxGetter {
+public with sharing class DropBoxConnection {
 
-    private String pathToFile;
-
-    public LinkToFileInDropBoxGetter(String pathToFile){
-        this.pathToFile = pathToFile;
-    }
-
-    public String getDownloadLink() {
+    public String getDownloadLink(String pathToFile) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
         String result;
@@ -25,8 +19,11 @@ public with sharing class LinkToFileInDropBoxGetter {
             Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
             result = String.valueOf(resultMap.get('link'));
         } else {
-            result = 'Error ' + response.getStatusCode() + ': ' + response.getBody();
+            throw new DropBoxConnectionException(response.getBody());
         }
         return result;
+    }
+
+    private class DropBoxConnectionException extends Exception{
     }
 }
