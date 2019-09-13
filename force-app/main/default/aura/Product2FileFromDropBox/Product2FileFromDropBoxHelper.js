@@ -14,7 +14,7 @@
             {recordId: recordId}
         ).then(function (result) {
             if (result) {
-                cmp.set("v.disabled");
+                cmp.set("v.hasFile");
             }
         }).catch(function (errors) {
             let errorMessage = 'Unknown error';

@@ -4,6 +4,7 @@
 
 public with sharing class Product2FileFromDropBoxController {
 
+    @TestVisible
     private static DropBoxConnection dropBox = new DropBoxConnection();
 
     @AuraEnabled

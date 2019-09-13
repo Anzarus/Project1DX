@@ -24,6 +24,7 @@ public with sharing class DropBoxConnection {
         return result;
     }
 
+    @TestVisible
     private class DropBoxConnectionException extends Exception{
     }
 }
