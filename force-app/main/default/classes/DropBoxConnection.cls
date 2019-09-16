@@ -2,7 +2,7 @@
  * Created by AntonAntoniuk on 11.09.2019.
  */
 
-public with sharing class DropBoxConnection {
+public with sharing class DropBoxConnection implements DropBoxConnectionInterface {
 
     public String getDownloadLink(String pathToFile) {
         HttpRequest request = new HttpRequest();
@@ -25,6 +25,6 @@ public with sharing class DropBoxConnection {
     }
 
     @TestVisible
-    private class DropBoxConnectionException extends Exception{
+    private class DropBoxConnectionException extends Exception {
     }
 }
