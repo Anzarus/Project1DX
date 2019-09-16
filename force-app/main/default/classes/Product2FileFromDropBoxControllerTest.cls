@@ -15,7 +15,7 @@ private class Product2FileFromDropBoxControllerTest {
 
         Test.startTest();
         DropBoxConnection dropBox = (DropBoxConnection) Test.createStub(DropBoxConnection.class, new MockProvider());
-        Product2FileFromDropBoxController.dropBox = dropBox;
+//        Product2FileFromDropBoxController.dropBox = dropBox;
         String link1 = Product2FileFromDropBoxController.getFileForThisRecord(product2s[0].Id);
         String link2 = Product2FileFromDropBoxController.getFileForThisRecord(product2s[1].Id);
         Test.stopTest();
@@ -31,7 +31,7 @@ private class Product2FileFromDropBoxControllerTest {
 
         try {
             DropBoxConnection dropBox = (DropBoxConnection) Test.createStub(DropBoxConnection.class, new MockProvider());
-            Product2FileFromDropBoxController.dropBox = dropBox;
+//            Product2FileFromDropBoxController.dropBox = dropBox;
             Product2FileFromDropBoxController.getFileForThisRecord(product2.Id);
         } catch (DropBoxConnection.DropBoxConnectionException e) {
             System.assertEquals(e.getMessage(), e.getMessage());

@@ -39,7 +39,7 @@ public with sharing class DropBoxConnectionWithCacheDecorator extends DropBoxCon
         }
 
         void putCache(String key, String value) {
-            productPartition.put(key, value, 60);
+            productPartition.put(key, value);
         }
     }
 }

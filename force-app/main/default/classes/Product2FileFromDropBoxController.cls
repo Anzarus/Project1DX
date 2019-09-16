@@ -4,9 +4,6 @@
 
 public with sharing class Product2FileFromDropBoxController {
 
-    @TestVisible
-    private static DropBoxConnection dropBox = new DropBoxConnection();
-
     @AuraEnabled
     public static String getFileForThisRecord(String recordId) {
         Product2 product2 = [
@@ -15,7 +12,9 @@ public with sharing class Product2FileFromDropBoxController {
                 WHERE Id = :Id.valueOf(recordId)
         ];
 
-        return dropBox.getDownloadLink(product2.File_Id__c);
+        DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
+
+        return fabric.getLinkForRecord(product2.Id, product2.File_Id__c);
     }
 
     @AuraEnabled
@@ -31,5 +30,21 @@ public with sharing class Product2FileFromDropBoxController {
             return false;
         }
         return true;
+    }
+
+    private class DropBoxFileLinkFabric {
+        @TestVisible
+        private DropBoxConnection dropBox = new DropBoxConnection();
+
+        private String getLinkForRecord(String recordId, String pathToFile) {
+            Product2Cache__c product2CacheSettings = Product2Cache__c.getAll().get('Product2FileUrl');
+            String link;
+            if (product2CacheSettings.isCacheTemporraryLink__c) {
+                link = new DropBoxConnectionWithCacheDecorator(new DropBoxConnection(), recordId).getDownloadLink(pathToFile);
+            } else {
+                link = dropBox.getDownloadLink(pathToFile);
+            }
+            return link;
+        }
     }
 }
