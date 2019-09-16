@@ -9,17 +9,13 @@ public with sharing class Product2FileFromDropBoxController {
 
     @AuraEnabled
     public static String getFileForThisRecord(String recordId) {
-        try {
-            Product2 product2 = [
-                    SELECT File_Id__c
-                    FROM Product2
-                    WHERE Id = :Id.valueOf(recordId)
-            ];
+        Product2 product2 = [
+                SELECT File_Id__c
+                FROM Product2
+                WHERE Id = :Id.valueOf(recordId)
+        ];
 
-            return dropBox.getDownloadLink(product2.File_Id__c);
-        } catch (AuraHandledException e) {
-            throw e;
-        }
+        return dropBox.getDownloadLink(product2.File_Id__c);
     }
 
     @AuraEnabled
@@ -30,7 +26,8 @@ public with sharing class Product2FileFromDropBoxController {
                 WHERE Id = :Id.valueOf(recordId)
         ];
 
-        if (product2.File_Id__c == null) {
+        if (product2.File_Id__c == null
+                || product2.File_Id__c.trim() == '') {
             return false;
         }
         return true;

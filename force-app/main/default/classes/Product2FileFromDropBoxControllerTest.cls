@@ -25,7 +25,7 @@ private class Product2FileFromDropBoxControllerTest {
     }
 
     @IsTest
-    static void product2FileFromDropBoxControllerExceptionTest() {
+    static void product2FileFromDropBoxControllerDropBoxExceptionTest() {
         Product2 product2 = new Product2(Name = 'prod1', File_Id__c = ' ', Price__c = 10);
         insert product2;
 
@@ -36,5 +36,17 @@ private class Product2FileFromDropBoxControllerTest {
         } catch (DropBoxConnection.DropBoxConnectionException e) {
             System.assertEquals(e.getMessage(), e.getMessage());
         }
+    }
+
+    @IsTest
+    static void product2FileFromDropBoxControllerDropBoxHasFileTest() {
+        List<Product2> product2s = new List<Product2>{
+                new Product2(Name = 'prod1', File_Id__c = '', Price__c = 10),
+                new Product2(Name = 'prod1', File_Id__c = '/Document.docx', Price__c = 10)
+        };
+        insert product2s;
+
+        System.assertEquals(false, Product2FileFromDropBoxController.isProdHasFile(product2s[0].Id));
+        System.assertEquals(true, Product2FileFromDropBoxController.isProdHasFile(product2s[1].Id));
     }
 }

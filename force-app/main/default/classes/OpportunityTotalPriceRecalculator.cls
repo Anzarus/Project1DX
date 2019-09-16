@@ -62,7 +62,7 @@ public with sharing class OpportunityTotalPriceRecalculator {
         List<Opportunity> opportunities = [
                 SELECT Id, Total_Price__c
                 FROM Opportunity
-                WHERE Id IN :opportunityLineItemsByOppIds.keySet() //todo what about "Closed Won" status?
+                WHERE Id IN :opportunityLineItemsByOppIds.keySet()
         ];
         Map<Id, Opportunity> opportunitiesByIds = new Map<Id, Opportunity>(opportunities);
 
