@@ -18,7 +18,23 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>Product2FileFromDropBoxTest</apexClass>
+        <apexClass>DropBoxConnectionInterface</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DropBoxConnectionTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DropBoxConnectionTestMock</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>DropBoxConnectionCachedProxy</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>MockProvider</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -35,6 +51,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>Product2FileFromDropBoxController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>Product2FileFromDropBoxControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
