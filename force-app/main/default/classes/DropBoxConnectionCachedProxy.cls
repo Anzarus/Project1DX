@@ -4,19 +4,20 @@
 
 public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnectionInterface {
 
-    @TestVisible
-    private CacheController cache = new CacheController();
+    private CacheController cacheController;
     private DropBoxConnectionInterface dropBoxConnector;
 
-    public DropBoxConnectionCachedProxy(DropBoxConnectionInterface dropBoxConnector) {
+    public DropBoxConnectionCachedProxy(DropBoxConnectionInterface dropBoxConnector,
+            CacheController cache) {
         this.dropBoxConnector = dropBoxConnector;
+        this.cacheController = cache;
     }
 
     public String getDownloadLink(String fileId) {
 
-        if (!cache.hasCache(fileId)) {
-            cache.putCache(fileId, dropBoxConnector.getDownloadLink(fileId));
+        if (!cacheController.hasCache(fileId)) {
+            cacheController.putCache(fileId, dropBoxConnector.getDownloadLink(fileId));
         }
-        return cache.getCache(fileId);
+        return cacheController.getCache(fileId);
     }
 }

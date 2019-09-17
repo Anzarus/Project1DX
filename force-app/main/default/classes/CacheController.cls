@@ -7,7 +7,8 @@ public with sharing class CacheController {
     private Cache.OrgPartition productPartition = Cache.Org.getPartition('local.Product2LinkCache');
 
     public Boolean hasCache(String prodId) {
-        if (productPartition.contains(prodId)) {
+        Boolean bool = productPartition.contains(prodId);
+        if (bool) {
             return true;
         }
         return false;
