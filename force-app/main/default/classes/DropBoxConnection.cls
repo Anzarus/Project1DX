@@ -9,7 +9,7 @@ public with sharing class DropBoxConnection implements DropBoxConnectionInterfac
         Http http = new Http();
         String result;
 
-        request.setEndpoint('callout:DropBoxGetFile');
+        request.setEndpoint('callout:DropBoxGetFile/get_temporary_link');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json');
         request.setBody('{\"path\": \"' + pathToFile + '\"}');

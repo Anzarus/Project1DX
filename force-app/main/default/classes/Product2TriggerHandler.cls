@@ -35,4 +35,9 @@ public with sharing class Product2TriggerHandler {
         }
         return updatedOldProduct2sByIds;
     }
+
+    public void onDelete(Map<Id, Product2> deletedProds){
+        Map<String, Product2> product2sByFileIds = new Map<String, Product2>();//todo
+    }
+
 }
