@@ -24,19 +24,20 @@ public class MockProvider implements System.StubProvider {
             }
             return link;
         } else if (stubbedMethodName == 'hasCache') {
-            if (listOfArgs[0] == '/Document.docx') {
+            String key1 = String.valueOf('/Document.docx'.hashCode());
+            if (listOfArgs[0] == key1) {
                 return true;
             }
             return false;
         } else if (stubbedMethodName == 'getCache') {
-            if (listOfArgs[0] == '/Document.docx') {
+            String key1 = String.valueOf('/Document.docx'.hashCode());
+            String key2 = String.valueOf('/Test1.1.odt'.hashCode());
+            if (listOfArgs[0] == key1) {
                 return 'https://dl.dropboxusercontent.com/apitl/1/Doc';
-            } else if (listOfArgs[0] == '/Test1.1.odt') {
+            } else if (listOfArgs[0] == key2) {
                 return 'https://dl.dropboxusercontent.com/apitl/1/Odt';
             }
             return null;
-
-
         } else {
             return null;
         }

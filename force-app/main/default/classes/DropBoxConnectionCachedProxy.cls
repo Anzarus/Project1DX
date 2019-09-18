@@ -14,10 +14,10 @@ public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnect
     }
 
     public String getDownloadLink(String fileId) {
-
-        if (!cacheController.hasCache(fileId)) {
-            cacheController.putCache(fileId, dropBoxConnector.getDownloadLink(fileId));
+        String key = String.valueOf(fileId.hashCode());
+        if (!cacheController.hasCache(key)) {
+            cacheController.putCache(key, dropBoxConnector.getDownloadLink(fileId));
         }
-        return cacheController.getCache(fileId);
+        return cacheController.getCache(key);
     }
 }

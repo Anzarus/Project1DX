@@ -54,7 +54,7 @@ private class Product2FileFromDropBoxControllerTest {
 
     @IsTest
     static void product2FileFromDropBoxControllerDropBoxExceptionTest() {
-        Product2 product2 = new Product2(Name = 'prod1', File_Id__c = ' ', Price__c = 10);
+        Product2 product2 = new Product2(Name = 'prod1', File_Id__c = '?GNDFKLM', Price__c = 10);
         insert product2;
         Product2Cache__c cacheSetting = new Product2Cache__c(Name = 'Product2FileUrl', isCacheTemporraryLink__c = true);
         insert cacheSetting;
@@ -65,7 +65,7 @@ private class Product2FileFromDropBoxControllerTest {
             DropBoxFileLinkFabric.dropBox = dropBox;
             DropBoxFileLinkFabric.cacheController = cache;
 
-            String linkFirstTime1 = Product2FileFromDropBoxController.getFileForThisRecord(product2.Id);
+            Product2FileFromDropBoxController.getFileForThisRecord(product2.Id);
         } catch (DropBoxConnection.DropBoxConnectionException e) {
             System.assertEquals(e.getMessage(), e.getMessage());
         }

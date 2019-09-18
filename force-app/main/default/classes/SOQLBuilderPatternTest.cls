@@ -31,7 +31,7 @@ private class SOQLBuilderPatternTest {
                 ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
                 ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' Price__c, Status__c, File_Id__c FROM Product2', productQuery);
+                ' File_Id__c, Price__c, Status__c FROM Product2', productQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
@@ -62,8 +62,6 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnTypingNonValidValue() {
-        User user = getTestUser();
-        System.runAs(user) {
             try {
                 new SOQLBuilder(true)
                         .setField('566sccs')
@@ -72,7 +70,6 @@ private class SOQLBuilderPatternTest {
             } catch (SOQLBuilder.BuilderSOQLException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
             }
-        }
     }
 
     @IsTest
@@ -194,14 +191,7 @@ private class SOQLBuilderPatternTest {
     static void testExceptionOnAccessToFieldIfRulesStrictUsingString() {
         User user = getTestUser();
         insert user;
-        PermissionSet permissionSet = [
-                SELECT Id
-                FROM PermissionSet
-                WHERE Name = 'Testing_FLS_Permission_set'
-                LIMIT 1
-        ];
-        PermissionSetAssignment psa = new PermissionSetAssignment(PermissionSetId = permissionSet.Id, AssigneeId = user.Id);
-        insert psa;
+
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
@@ -215,7 +205,7 @@ private class SOQLBuilderPatternTest {
     }
 
     private static User getTestUser() {
-        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Test' LIMIT 1];
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
                 EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,
