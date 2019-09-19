@@ -11,7 +11,7 @@ trigger Product2Trigger on Product2 (/*after insert,*/ after update, after delet
             new Product2TriggerHandler().onUpdate(Trigger.new, Trigger.oldMap);
         }
         if(Trigger.isDelete){
-            new Product2TriggerHandler().onDelete(Trigger.oldMap);
+            new Product2TriggerHandler().onDelete(Trigger.old);
         }
     }
 }

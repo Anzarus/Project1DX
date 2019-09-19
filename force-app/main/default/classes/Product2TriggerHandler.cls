@@ -36,8 +36,17 @@ public with sharing class Product2TriggerHandler {
         return updatedOldProduct2sByIds;
     }
 
-    public void onDelete(Map<Id, Product2> deletedProds){
-        Map<String, Product2> product2sByFileIds = new Map<String, Product2>();//todo
+    public void onDelete(List<Product2> deletedProds) {
+        List<String> product2sFileIds = new List<String>();
+
+        for (Product2 prod : deletedProds) {
+            product2sFileIds.add(prod.File_Id__c);
+        }
+        callDropBoxDeleting(product2sFileIds);
     }
 
+    @Future(Callout=true)
+    private static void callDropBoxDeleting(List<String> product2sFileIds) {
+        new DropBoxConnection().deleteFiles(product2sFileIds);
+    }
 }
