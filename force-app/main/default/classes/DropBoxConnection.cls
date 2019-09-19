@@ -24,7 +24,7 @@ public with sharing class DropBoxConnection implements DropBoxConnectionInterfac
         return result;
     }
 
-    public void deleteFiles(List<String> pathToFiles) {
+    public String deleteFiles(List<String> pathToFiles) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
 
@@ -34,7 +34,10 @@ public with sharing class DropBoxConnection implements DropBoxConnectionInterfac
         request.setBody('{\"entries\": [' + createDelRequestBodyData(pathToFiles) + ']}');
         HttpResponse response = http.send(request);
 
-        if (response.getStatusCode() != 200) {
+        if (response.getStatusCode() == 200) {
+            Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+            return String.valueOf(resultMap.get('async_job_id'));
+        } else {
             throw new DropBoxConnectionException(response.getBody());
         }
     }

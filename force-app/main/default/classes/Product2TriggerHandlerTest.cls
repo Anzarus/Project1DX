@@ -174,6 +174,27 @@ private class Product2TriggerHandlerTest {
         System.assertEquals(opps[0].Total_Price__c, updatedOpps[0].Total_Price__c);
     }
 
+    @IsTest
+    static void testSuccessDeleting() {
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+
+        List<Product2> prods = new List<Product2>{
+                new Product2(Name = 'prod1', Price__c = 1, File_Id__c = '/file (2).txt'),
+                new Product2(Name = 'prod2', Price__c = 1, File_Id__c = '/file (1).txt'),
+                new Product2(Name = 'prod3', Price__c = 1, File_Id__c = '/file (1) (1).txt')
+        };
+
+        insert prods;
+        Map<Id, Product2> product2sByIds = new Map<Id, Product2>();
+        delete prods;
+
+        System.assertEquals(new List<Product2>(), [
+                SELECT Id
+                FROM Product2
+                WHERE Id IN :product2sByIds.keySet()
+        ]);
+    }
+
     private static User getTestUser() {
         Profile profile = [SELECT Id FROM Profile WHERE Name = 'Standard user' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
