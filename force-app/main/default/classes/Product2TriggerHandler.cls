@@ -47,6 +47,9 @@ public with sharing class Product2TriggerHandler {
 
     @Future(Callout=true)
     private static void callDropBoxDeleting(List<String> product2sFileIds) {
-        new DropBoxConnection().deleteFiles(product2sFileIds);
+        String jobId = new DropBoxConnection().deleteFiles(product2sFileIds);
+
+        Remove_Job__c removeJob = new Remove_Job__c(JobId__c = jobId);
+        insert removeJob;
     }
 }
