@@ -31,7 +31,7 @@ private class SOQLBuilderPatternTest {
                 ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
                 ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' File_Id__c, Price__c, Status__c FROM Product2', productQuery);
+                ' Price__c, Status__c FROM Product2', productQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }

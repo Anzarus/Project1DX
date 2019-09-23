@@ -25,6 +25,28 @@ public class DropBoxConnectionTestMock implements HttpCalloutMock {
                 response.setStatusCode(409);
                 response.setBody('Something went wrong!');
             }
+        } else if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
+            if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}') {
+                response.setStatusCode(200);
+                response.setBody('{".tag": "complete","entries": ' +
+                        '[{".tag": "success",' +
+                        '"metadata": {"path_display": "/file (1).txt"}},' +
+                        '{".tag": "success",' +
+                        '"metadata": {"path_display": "/file (3).txt"}}]}');
+            } else if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}') {
+                response.setStatusCode(200);
+                response.setBody('{".tag": "complete","entries": ' +
+                        '[{".tag": "failure",' +
+                        '"failure": {".tag": "path_lookup","path_lookup": {".tag": "not_found"}}},' +
+                        '{".tag": "success",' +
+                        '"metadata": {"path_display": "/file (2).txt"}}]}');
+            } else if (request.getBody() == '{\"async_job_id\": \"dbjid:other\"}') {
+                response.setStatusCode(200);
+                response.setBody('{".tag": "other","entries": {}}');
+            } else {
+                response.setStatusCode(409);
+                response.setBody('Something went wrong!');
+            }
         }
         return response;
     }

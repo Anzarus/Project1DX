@@ -15,7 +15,7 @@ private class SOQLGeneratorTest {
                 ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
                 ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
                 ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' File_Id__c, Price__c, Status__c FROM Product2 ', resultProduct2SOQL);
+                ' Price__c, Status__c FROM Product2 ', resultProduct2SOQL);
     }
 
     @IsTest

@@ -59,7 +59,7 @@ public with sharing class DropBoxConnection implements DropBoxConnectionInterfac
         request.setEndpoint('callout:DropBoxGetFile/delete_batch/check');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json');
-        request.setBody('{\"async_job_id\":\"' + jobId + '\"}');
+        request.setBody('{\"async_job_id\": \"' + jobId + '\"}');
         HttpResponse response = http.send(request);
 
         if (response.getStatusCode() == 200) {

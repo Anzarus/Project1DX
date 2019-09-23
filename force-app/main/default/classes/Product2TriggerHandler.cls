@@ -36,11 +36,16 @@ public with sharing class Product2TriggerHandler {
         return updatedOldProduct2sByIds;
     }
 
-    public void onDelete(List<Product2> deletedProds) {
+    public void onDelete(Map<Id, Product2> deletedProdsByIds) {
+        List<File_Source__c> files = [
+                SELECT Name, Product__c
+                FROM File_Source__c
+                WHERE Product__c IN :deletedProdsByIds.keySet()
+        ];
         List<String> product2sFileIds = new List<String>();
 
-        for (Product2 prod : deletedProds) {
-            product2sFileIds.add(prod.File_Id__c);
+        for (File_Source__c file : files) {
+            product2sFileIds.add(file.Name);
         }
         callDropBoxDeleting(product2sFileIds);
     }
@@ -51,5 +56,12 @@ public with sharing class Product2TriggerHandler {
 
         Remove_Job__c removeJob = new Remove_Job__c(JobId__c = jobId);
         insert removeJob;
+
+        List<File_Source__c> files = [SELECT Remove_Job__c FROM File_Source__c WHERE Name IN :product2sFileIds];
+
+        for (File_Source__c file: files){
+            file.Remove_Job__c = removeJob.Id;
+        }
+        update files;
     }
 }

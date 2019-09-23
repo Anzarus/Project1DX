@@ -5,28 +5,31 @@
 public with sharing class Product2FileFromDropBoxController {
 
     @AuraEnabled
-    public static String getFileForThisRecord(String recordId) {
-        Product2 product2 = [
-                SELECT File_Id__c
-                FROM Product2
-                WHERE Id = :Id.valueOf(recordId)
+    public static List<String> getFileForThisRecord(String recordId) {
+        List<File_Source__c> fileSources = [
+                SELECT Name
+                FROM File_Source__c
+                WHERE Product__c = :Id.valueOf(recordId)
         ];
 
         DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
 
-        return fabric.getLinkForRecord(product2.File_Id__c);
+        List<String> fileUrls = new List<String>();
+        for (File_Source__c file : fileSources) {
+            fileUrls.add(fabric.getLinkForRecord(file.Name));
+        }
+        return fileUrls;
     }
 
     @AuraEnabled
     public static Boolean isProdHasFile(String recordId) {
-        Product2 product2 = [
-                SELECT File_Id__c
-                FROM Product2
-                WHERE Id = :Id.valueOf(recordId)
+        List<File_Source__c> fileSources = [
+                SELECT Name
+                FROM File_Source__c
+                WHERE Product__c = :Id.valueOf(recordId)
         ];
 
-        if (product2.File_Id__c == null
-                || product2.File_Id__c.trim() == '') {
+        if (fileSources.isEmpty()) {
             return false;
         }
         return true;

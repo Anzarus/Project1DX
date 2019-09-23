@@ -179,19 +179,26 @@ private class Product2TriggerHandlerTest {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
 
         List<Product2> prods = new List<Product2>{
-                new Product2(Name = 'prod1', Price__c = 1, File_Id__c = '/file (2).txt'),
-                new Product2(Name = 'prod2', Price__c = 1, File_Id__c = '/file (1).txt'),
-                new Product2(Name = 'prod3', Price__c = 1, File_Id__c = '/file (1) (1).txt')
+                new Product2(Name = 'prod1', Price__c = 1),
+                new Product2(Name = 'prod2', Price__c = 1),
+                new Product2(Name = 'prod3', Price__c = 1)
         };
-
         insert prods;
-        Map<Id, Product2> product2sByIds = new Map<Id, Product2>();
+
+        List<File_Source__c> files = new List<File_Source__c>{
+                new File_Source__c(Name = '/file (2).txt', Product__c = prods[0].Id),
+                new File_Source__c(Name = '/file (1).txt', Product__c = prods[1].Id),
+                new File_Source__c(Name = '/file (1) (1).txt', Product__c = prods[2].Id)
+        };
+        insert files;
+
+        Test.startTest();
         delete prods;
+        Test.stopTest();
 
         System.assertEquals(new List<Product2>(), [
                 SELECT Id
                 FROM Product2
-                WHERE Id IN :product2sByIds.keySet()
         ]);
     }
 
