@@ -1,0 +1,2 @@
+Dear, {!User.FirstName} {!User.LastName}!
+{!Remove_Job__c.Error_Message__c}
