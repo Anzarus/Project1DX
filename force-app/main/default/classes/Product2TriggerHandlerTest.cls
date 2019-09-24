@@ -4,13 +4,12 @@
 
 @IsTest
 private class Product2TriggerHandlerTest {
+
     final static Integer LOW_BORDER_PRICE = 100;
     final static Integer HIGH_BORDER_PRICE = 10000;
 
-
     @IsTest
     static void testOneProductToOneOppPriceUpdate() {
-
         List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 1,
                 LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
@@ -35,12 +34,10 @@ private class Product2TriggerHandlerTest {
 
         System.assertEquals(opps[0].Total_Price__c + differenceOfPrices.get(product2s[0].Id) *
                 oppLineItemsByOppIds.get(updatedOpps[0].Id).Quantity, updatedOpps[0].Total_Price__c);
-
     }
 
     @IsTest
     static void testOneProductToManyOppPriceUpdate() {
-
         List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(200, 1,
                 LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
@@ -71,7 +68,6 @@ private class Product2TriggerHandlerTest {
 
     @IsTest
     static void testManyProductToOneOppPriceUpdate() {
-
         List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(1, 200,
                 LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
@@ -105,7 +101,6 @@ private class Product2TriggerHandlerTest {
 
     @IsTest
     static void testManyProductToManyOppPriceUpdate() {
-
         List<Product2> product2s = TestProductAndOppCreator.generateAndConnectProdToOpp(20, 10,
                 LOW_BORDER_PRICE, HIGH_BORDER_PRICE);
         Map<Id, Product2> product2sByIds = new Map<Id, Product2>(product2s);
@@ -174,27 +169,6 @@ private class Product2TriggerHandlerTest {
         System.assertEquals(opps[0].Total_Price__c, updatedOpps[0].Total_Price__c);
     }
 
-    @IsTest
-    static void testSuccessDeleting() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
-
-        List<Product2> prods = new List<Product2>{
-                new Product2(Name = 'prod1', Price__c = 1, File_Id__c = '/file (2).txt'),
-                new Product2(Name = 'prod2', Price__c = 1, File_Id__c = '/file (1).txt'),
-                new Product2(Name = 'prod3', Price__c = 1, File_Id__c = '/file (1) (1).txt')
-        };
-
-        insert prods;
-        Map<Id, Product2> product2sByIds = new Map<Id, Product2>();
-        delete prods;
-
-        System.assertEquals(new List<Product2>(), [
-                SELECT Id
-                FROM Product2
-                WHERE Id IN :product2sByIds.keySet()
-        ]);
-    }
-
     private static User getTestUser() {
         Profile profile = [SELECT Id FROM Profile WHERE Name = 'Standard user' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
@@ -203,8 +177,7 @@ private class Product2TriggerHandlerTest {
                 TimeZoneSidKey = 'America/Los_Angeles');
 
         PermissionSet permissionSet = [SELECT Id FROM PermissionSet WHERE Label = 'Project 1 user permission set'];
-        PermissionSetAssignment psa = new PermissionSetAssignment
-                (PermissionSetId = permissionSet.Id, AssigneeId = testUser.Id);
+        new PermissionSetAssignment(PermissionSetId = permissionSet.Id, AssigneeId = testUser.Id);
 
         return testUser;
     }
@@ -276,5 +249,48 @@ private class Product2TriggerHandlerTest {
             }
         }
         return targetQuantity;
+    }
+
+    @IsTest
+    static void testSuccessDeleting() {
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+
+        List<Product2> prods = new List<Product2>{
+                new Product2(Name = 'prod1', Price__c = 1, File_Id__c = '/file (2).txt'),
+                new Product2(Name = 'prod2', Price__c = 1, File_Id__c = '/file (1).txt'),
+                new Product2(Name = 'prod3', Price__c = 1, File_Id__c = '/file (1) (1).txt')
+        };
+        insert prods;
+
+        Map<Id, Product2> product2sByIds = new Map<Id, Product2>();
+
+        Test.startTest();
+        delete prods;
+        Test.stopTest();
+
+        System.assertEquals(new List<Product2>(), [
+                SELECT Id
+                FROM Product2
+                WHERE Id IN :product2sByIds.keySet()
+        ]);
+    }
+
+    private class DropBoxConnectionTestMock implements HttpCalloutMock {
+
+        public HttpResponse respond(HttpRequest request) {
+            HttpResponse response = new HttpResponse();
+            if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch') {
+                if (request.getBody() == '{\"entries\": [{\"path\": \"/file (2).txt\"}, ' +
+                        '{\"path\": \"/file (1).txt\"}, ' +
+                        '{\"path\": \"/file (1) (1).txt\"}]}') {
+                    response.setStatusCode(200);
+                    response.setBody('{".tag": "async_job_id", "async_job_id": "dbjid:AABoqpEIEjq"}');
+                } else {
+                    response.setStatusCode(409);
+                    response.setBody('Something went wrong!');
+                }
+            }
+            return response;
+        }
     }
 }

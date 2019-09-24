@@ -4,6 +4,9 @@
 
 public with sharing class Product2FileFromDropBoxController {
 
+    @TestVisible
+    static DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
+
     @AuraEnabled
     public static String getFileForThisRecord(String recordId) {
         Product2 product2 = [
@@ -12,9 +15,8 @@ public with sharing class Product2FileFromDropBoxController {
                 WHERE Id = :Id.valueOf(recordId)
         ];
 
-        DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
-
-        return fabric.getLinkForRecord(product2.File_Id__c);
+        DropBoxConnection connector = fabric.getDropBoxConnector();
+        return connector.getDownloadLink(product2.File_Id__c);
     }
 
     @AuraEnabled
@@ -25,8 +27,7 @@ public with sharing class Product2FileFromDropBoxController {
                 WHERE Id = :Id.valueOf(recordId)
         ];
 
-        if (product2.File_Id__c == null
-                || product2.File_Id__c.trim() == '') {
+        if (String.isEmpty(product2.File_Id__c)) {
             return false;
         }
         return true;

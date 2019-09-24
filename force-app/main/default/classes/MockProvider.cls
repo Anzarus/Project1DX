@@ -9,20 +9,9 @@ public class MockProvider implements System.StubProvider {
             Type returnType, List<Type> listOfParamTypes, List<String> listOfParamNames,
             List<Object> listOfArgs) {
 
-        if (stubbedMethodName == 'getDownloadLink') {
-            String link;
-            switch on String.valueOf(listOfArgs[0]) {
-                when '/Document.docx' {
-                    link = 'https://dl.dropboxusercontent.com/apitl/1/Doc';
-                }
-                when '/Test1.1.odt' {
-                    link = 'https://dl.dropboxusercontent.com/apitl/1/Odt';
-                }
-                when else {
-                    throw new DropBoxConnection.DropBoxConnectionException();
-                }
-            }
-            return link;
+        if (stubbedMethodName == 'getDropBoxConnector') {
+            DropBoxConnection connection = new Product2FileFromDropBoxControllerTest.DropBoxConnectionTestImpl();
+            return connection;
         } else if (stubbedMethodName == 'hasCache') {
             String key1 = String.valueOf('/Document.docx'.hashCode());
             if (listOfArgs[0] == key1) {

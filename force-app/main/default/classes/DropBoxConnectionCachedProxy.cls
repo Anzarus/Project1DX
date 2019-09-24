@@ -2,22 +2,21 @@
  * Created by AntonAntoniuk on 16.09.2019.
  */
 
-public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnectionInterface {
+public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnection {
 
-    private CacheController cacheController;
-    private DropBoxConnectionInterface dropBoxConnector;
+    @TestVisible
+    private CacheController cache = new CacheController();
+    private DropBoxConnection dropBoxConnector;
 
-    public DropBoxConnectionCachedProxy(DropBoxConnectionInterface dropBoxConnector,
-            CacheController cache) {
+    public DropBoxConnectionCachedProxy(DropBoxConnection dropBoxConnector) {
         this.dropBoxConnector = dropBoxConnector;
-        this.cacheController = cache;
     }
 
     public String getDownloadLink(String fileId) {
         String key = String.valueOf(fileId.hashCode());
-        if (!cacheController.hasCache(key)) {
-            cacheController.putCache(key, dropBoxConnector.getDownloadLink(fileId));
+        if (!cache.hasCache(key)) {
+            cache.putCache(key, dropBoxConnector.getDownloadLink(fileId));
         }
-        return cacheController.getCache(key);
+        return cache.getCache(key);
     }
 }
