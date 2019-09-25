@@ -4,19 +4,13 @@
 
 public with sharing class DropBoxFileLinkFabric {
 
-    @TestVisible
-    private static DropBoxConnection dropBox = new DropBoxConnection();
-    @TestVisible
-    private static CacheController cacheController = new CacheController();
-
-    public String getLinkForRecord(String fileId) {
+    public DropBoxConnection getDropBoxConnector() {
         Product2Cache__c product2CacheSettings = Product2Cache__c.getAll().get('Product2FileUrl');
-        String link;
+        DropBoxConnection connection = new DropBoxConnectionImpl();
         if (product2CacheSettings.isCacheTemporraryLink__c) {
-            link = new DropBoxConnectionCachedProxy(dropBox, cacheController).getDownloadLink(fileId);
+            return new DropBoxConnectionCachedProxy(connection);
         } else {
-            link = dropBox.getDownloadLink(fileId);
+            return connection;
         }
-        return link;
     }
 }

@@ -70,4 +70,35 @@ private class CheckJobStatusUtilTest {
         System.assertEquals(files[0], [SELECT Name, Remove_Job__c, Id FROM File_Source__c WHERE Id = :files[0].Id]);
         System.assertEquals(files[1], [SELECT Name, Remove_Job__c, Id FROM File_Source__c WHERE Id = :files[1].Id]);
     }
+
+    private class DropBoxConnectionTestMock implements HttpCalloutMock {
+
+        public HttpResponse respond(HttpRequest request) {
+            HttpResponse response = new HttpResponse();
+            if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
+                if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}') {
+                    response.setStatusCode(200);
+                    response.setBody('{".tag": "complete","entries": ' +
+                            '[{".tag": "success",' +
+                            '"metadata": {"path_display": "/file (1).txt"}},' +
+                            '{".tag": "success",' +
+                            '"metadata": {"path_display": "/file (3).txt"}}]}');
+                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}') {
+                    response.setStatusCode(200);
+                    response.setBody('{".tag": "complete","entries": ' +
+                            '[{".tag": "failure",' +
+                            '"failure": {".tag": "path_lookup","path_lookup": {".tag": "not_found"}}},' +
+                            '{".tag": "success",' +
+                            '"metadata": {"path_display": "/file (2).txt"}}]}');
+                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:other\"}') {
+                    response.setStatusCode(200);
+                    response.setBody('{".tag": "other","entries": {}}');
+                } else {
+                    response.setStatusCode(409);
+                    response.setBody('Something went wrong!');
+                }
+            }
+            return response;
+        }
+    }
 }

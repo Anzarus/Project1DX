@@ -6,7 +6,7 @@ public with sharing class CheckJobStatusUtil {
 
     @Future(Callout=true)
     public static void checkDeletionStatus() {
-        DropBoxConnection dropBox = new DropBoxConnection();
+        DropBoxConnectionImpl dropBox = new DropBoxConnectionImpl();
         List<Remove_Job__c> openJobs = getOpenJobs();
         Map<String, List<String>> resultMessage;
         List<String> deletedFiles = new List<String>();
@@ -18,7 +18,7 @@ public with sharing class CheckJobStatusUtil {
         update openJobs;
     }
 
-    private static void makeCallouts(List<Remove_Job__c> openJobs, Map<String, List<String>> resultMessage, DropBoxConnection dropBox, List<String> deletedFiles) {
+    private static void makeCallouts(List<Remove_Job__c> openJobs, Map<String, List<String>> resultMessage, DropBoxConnectionImpl dropBox, List<String> deletedFiles) {
         for (Remove_Job__c job : openJobs) {
             resultMessage = dropBox.checkDeletedStatus(job.JobId__c);
             if (resultMessage != null) {

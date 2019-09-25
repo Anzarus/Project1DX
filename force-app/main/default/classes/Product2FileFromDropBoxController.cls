@@ -4,6 +4,9 @@
 
 public with sharing class Product2FileFromDropBoxController {
 
+    @TestVisible
+    static DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
+
     @AuraEnabled
     public static List<String> getFileForThisRecord(String recordId) {
         List<File_Source__c> fileSources = [
@@ -12,11 +15,11 @@ public with sharing class Product2FileFromDropBoxController {
                 WHERE Product__c = :Id.valueOf(recordId)
         ];
 
-        DropBoxFileLinkFabric fabric = new DropBoxFileLinkFabric();
+        DropBoxConnection connector = fabric.getDropBoxConnector();
 
         List<String> fileUrls = new List<String>();
         for (File_Source__c file : fileSources) {
-            fileUrls.add(fabric.getLinkForRecord(file.Name));
+            fileUrls.add(connector.getDownloadLink(file.Name));
         }
         return fileUrls;
     }
