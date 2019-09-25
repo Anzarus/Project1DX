@@ -13,10 +13,6 @@ public with sharing class HttpEventTriggerHandler {
         Http_Event__e event;
 
         for (Integer i = 0; i < events.size(); i++) {
-            if (Math.mod(i, 200) == 0) {
-                EventBus.TriggerContext.currentContext().setResumeCheckpoint(event.ReplayId);
-            }
-
             event = events[i];
 
             httpLifeCycles.add(new Http_Life_Cycle__c(
@@ -27,6 +23,10 @@ public with sharing class HttpEventTriggerHandler {
                     Status_Code__c = event.Status_Code__c,
                     Url__c = event.Url__c
             ));
+
+            if (Math.mod(i + 1, 200) == 0) {
+                EventBus.TriggerContext.currentContext().setResumeCheckpoint(event.ReplayId);
+            }
         }
         insert httpLifeCycles;
     }
