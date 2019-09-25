@@ -15,6 +15,8 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         request.setBody('{\"path\": \"' + pathToFile + '\"}');
         HttpResponse response = http.send(request);
 
+        new HttpLogger().logHttpUsingPlatformEvent(request, response);
+
         if (response.getStatusCode() == 200) {
             Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
             result = String.valueOf(resultMap.get('link'));
@@ -35,6 +37,8 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         request.setHeader('Content-Type', 'application/json');
         request.setBody('{\"entries\": [' + createDelRequestBodyData(pathToFiles) + ']}');
         HttpResponse response = http.send(request);
+
+        new HttpLogger().logHttpUsingPlatformEvent(request, response);
 
         if (response.getStatusCode() == 200) {
             Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
@@ -63,6 +67,8 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         request.setHeader('Content-Type', 'application/json');
         request.setBody('{\"async_job_id\": \"' + jobId + '\"}');
         HttpResponse response = http.send(request);
+
+        new HttpLogger().logHttpUsingPlatformEvent(request, response);
 
         if (response.getStatusCode() == 200) {
             Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
