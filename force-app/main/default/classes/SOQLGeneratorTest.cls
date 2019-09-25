@@ -6,16 +6,20 @@
 private class SOQLGeneratorTest {
     @IsTest
     static void testGeneratingSOQLForProduct2 () {
-        SOQLGenerator soqlGenerator = new SOQLGenerator(Product2.SObjectType);
+        SOQLGenerator soqlGenerator = new SOQLGenerator(Task.SObjectType);
 
         String resultProduct2SOQL = soqlGenerator.generateSOQL();
 
-        System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
-                ' IsActive, CreatedDate, CreatedById, LastModifiedDate,' +
-                ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
-                ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
-                ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' File_Id__c, Price__c, Status__c FROM Product2 ', resultProduct2SOQL);
+        System.assertEquals('SELECT Id, WhoId, WhatId, Subject, ActivityDate,' +
+                ' Status, Priority, IsHighPriority, OwnerId, Description, Type,' +
+                ' IsDeleted, AccountId, IsClosed, CreatedDate, CreatedById,' +
+                ' LastModifiedDate, LastModifiedById, SystemModstamp, IsArchived,' +
+                ' CallDurationInSeconds, CallType, CallDisposition, CallObject,' +
+                ' ReminderDateTime, IsReminderSet, RecurrenceActivityId, IsRecurrence,' +
+                ' RecurrenceStartDateOnly, RecurrenceEndDateOnly, RecurrenceTimeZoneSidKey,' +
+                ' RecurrenceType, RecurrenceInterval, RecurrenceDayOfWeekMask,' +
+                ' RecurrenceDayOfMonth, RecurrenceInstance, RecurrenceMonthOfYear,' +
+                ' RecurrenceRegeneratedType, TaskSubtype, CompletedDateTime FROM Task ', resultProduct2SOQL);
     }
 
     @IsTest

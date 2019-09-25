@@ -7,15 +7,15 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testGeneratingSOQLForDifferentSObjects() {
-        SObjectType sObjectType = Product2.SObjectType;
+        SObjectType sObjectType = Task.SObjectType;
         List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
 
         SOQLBuilder builder = new SOQLBuilder();
 
-        String productQuery = builder
+        String taskQuery = builder
                 .setFields(sObjectFields)
                 .setFrom(sObjectType)
-                .setFrom('Product2')
+                .setFrom('Task')
                 .build();
 
         String contactQuery = builder
@@ -26,12 +26,16 @@ private class SOQLBuilderPatternTest {
                 .setSecurityEnforced()
                 .build();
 
-        System.assertEquals('SELECT Id, Name, ProductCode, Description,' +
-                ' IsActive, CreatedDate, CreatedById, LastModifiedDate,' +
-                ' LastModifiedById, SystemModstamp, Family, ExternalDataSourceId,' +
-                ' ExternalId, DisplayUrl, QuantityUnitOfMeasure, IsDeleted,' +
-                ' IsArchived, LastViewedDate, LastReferencedDate, StockKeepingUnit,' +
-                ' File_Id__c, Price__c, Status__c FROM Product2', productQuery);
+        System.assertEquals('SELECT Id, WhoId, WhatId, Subject, ActivityDate,' +
+                ' Status, Priority, IsHighPriority, OwnerId, Description, Type,' +
+                ' IsDeleted, AccountId, IsClosed, CreatedDate, CreatedById,' +
+                ' LastModifiedDate, LastModifiedById, SystemModstamp, IsArchived,' +
+                ' CallDurationInSeconds, CallType, CallDisposition, CallObject,' +
+                ' ReminderDateTime, IsReminderSet, RecurrenceActivityId, IsRecurrence,' +
+                ' RecurrenceStartDateOnly, RecurrenceEndDateOnly, RecurrenceTimeZoneSidKey,' +
+                ' RecurrenceType, RecurrenceInterval, RecurrenceDayOfWeekMask,' +
+                ' RecurrenceDayOfMonth, RecurrenceInstance, RecurrenceMonthOfYear,' +
+                ' RecurrenceRegeneratedType, TaskSubtype, CompletedDateTime FROM Task', taskQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
