@@ -1,0 +1,12 @@
+{
+    "records": [
+        {
+            "attributes": {
+                "type": "Product2Cache__c",
+                "referenceId": "Product2Cache__cRef1"
+            },
+            "Name": "Product2FileUrl",
+            "isCacheTemporraryLink__c": false
+        }
+    ]
+}
