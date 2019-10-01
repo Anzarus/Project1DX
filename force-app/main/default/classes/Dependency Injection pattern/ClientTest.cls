@@ -22,4 +22,29 @@ private class ClientTest {
         System.assertEquals(OneDriveManager.deleteFile(''),'Delete File From OneDrive');
         System.assertEquals(OneDriveManager.sendFile(''),'Send File To OneDrive');
     }
+
+    @IsTest
+    static void testMockBehavior() {
+        ServiceConnection YandexManager = DI.getInst(ServiceConnection.class, 'yandex');
+        YandexManager = DI.overrideInst(ServiceConnection.class, new testImpl());
+
+        System.assertEquals(YandexManager.getFileDownloadLink(''),'1');
+        System.assertEquals(YandexManager.sendFile(''),'2');
+        System.assertEquals(YandexManager.deleteFile(''),'3');
+    }
+
+    class testImpl implements ServiceConnection{
+
+        public String getFileDownloadLink(String fileId) {
+            return '1';
+        }
+
+        public String sendFile(String fileId) {
+            return '2';
+        }
+
+        public String deleteFile(String fileId) {
+            return '3';
+        }
+    }
 }
