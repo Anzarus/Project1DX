@@ -27,7 +27,7 @@ public with sharing class DI {
         return (ServiceConnection) Type.forName(implByInterfaces.get(implType)).newInstance();
     }
 
-    public ServiceConnection overrideInst(String implType, Object mockImpl) {
+    public static ServiceConnection overrideInst(String implType, Object mockImpl) {
         if (implByInterfaces.containsKey(implType)) {
             return (ServiceConnection) mockImpl;
         }
