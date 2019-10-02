@@ -4,24 +4,47 @@
 
 public with sharing class DI {
 
-    private static Map<String, String> implByInterfaces = new Map<String, String>();
+    private static Map<Type, Map<String, String>> implByInterfaces = new Map<Type, Map<String, String>>();
 
-    public static ServiceConnection getInst(Type intfType, String implType) {
-        List<Product_File_Setting__mdt> impls = [
-                SELECT Label, ImplClassName__c
-                FROM Product_File_Setting__mdt
-                WHERE Label = :implType AND Interface_Type__c = :intfType.toString()
-        ];
-        for (Product_File_Setting__mdt impl : impls) {
-            implByInterfaces.put(impl.Label, impl.ImplClassName__c);
-        }
-        return (ServiceConnection) Type.forName(implByInterfaces.get(implType)).newInstance();
+    static {
+        initDI();
     }
 
-    public static ServiceConnection overrideInst(String implType, Object mockImpl) {
-        if (implByInterfaces.containsKey(implType)) {
-            return (ServiceConnection) mockImpl;
+    private static void initDI() {
+        List<Product_File_Setting__mdt> impls = [
+                SELECT Interface_Type__c, Label, ImplClassName__c
+                FROM Product_File_Setting__mdt
+        ];
+        for (Product_File_Setting__mdt impl : impls) {
+            if (!implByInterfaces.containsKey(Type.forName(impl.Interface_Type__c))) {
+                implByInterfaces.put(Type.forName(impl.Interface_Type__c), new Map<String, String>{
+                        impl.Label => impl.ImplClassName__c
+                });
+            } else {
+                implByInterfaces.get(Type.forName(impl.Interface_Type__c)).put(impl.Label, impl.ImplClassName__c);
+            }
         }
-        return null;
+    }
+
+    public static Object getInst(Type interfaceType, String implType) {
+        if (implByInterfaces.containsKey(interfaceType)) {
+            if (implByInterfaces.get(interfaceType).containsKey(implType)) {
+                try {
+                    return Type.forName(implByInterfaces.get(interfaceType).get(implType)).newInstance();
+                } catch (NullPointerException e) {
+                    e.setMessage('Impl has not been found!');
+                }
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    public static void overrideInst(Type interfaceType, String implType, Type mockImpl) {
+        if (implByInterfaces.containsKey(interfaceType)) {
+            if (implByInterfaces.get(interfaceType).containsKey(implType)) {
+                implByInterfaces.get(interfaceType).remove(implType);
+                implByInterfaces.get(interfaceType).put(implType, mockImpl.toString());
+            }
+        }
     }
 }
