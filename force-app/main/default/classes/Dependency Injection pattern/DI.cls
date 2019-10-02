@@ -4,26 +4,17 @@
 
 public with sharing class DI {
 
-    private Map<String, String> implByInterfaces;
+    private static Map<String, String> implByInterfaces = new Map<String, String>();
 
-    public DI(Type interfaceType) {
-        this.implByInterfaces = putImplsToMap(interfaceType);
-    }
-
-    private Map<String, String> putImplsToMap(Type interfaceType) {
-        Map<String, String> buffMap = new Map<String, String>();
+    public static ServiceConnection getInst(Type intfType, String implType) {
         List<Product_File_Setting__mdt> impls = [
                 SELECT Label, ImplClassName__c
                 FROM Product_File_Setting__mdt
-                WHERE Interface_Type__c = :interfaceType.toString()
+                WHERE Label = :implType AND Interface_Type__c = :intfType.toString()
         ];
         for (Product_File_Setting__mdt impl : impls) {
-            buffMap.put(impl.Label, impl.ImplClassName__c);
+            implByInterfaces.put(impl.Label, impl.ImplClassName__c);
         }
-        return buffMap;
-    }
-
-    public ServiceConnection getInst(String implType) {
         return (ServiceConnection) Type.forName(implByInterfaces.get(implType)).newInstance();
     }
 
