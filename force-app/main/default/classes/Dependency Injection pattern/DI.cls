@@ -4,26 +4,30 @@
 
 public with sharing class DI {
 
-    private static Map<String, String> implByInterfaces = new Map<String, String>();
+    private Map<String, String> implByInterfaces;
 
-    public static ServiceConnection getInst(Type intfType, String implType) {
+    public DI(Type interfaceType) {
+        this.implByInterfaces = new Map<String, String>();
+
         List<Product_File_Setting__mdt> impls = [
-                SELECT Interface_Type__c, ImplClassName__c
+                SELECT Label, ImplClassName__c
                 FROM Product_File_Setting__mdt
-                WHERE Label = :implType
+                WHERE Interface_Type__c = :interfaceType.toString()
         ];
         for (Product_File_Setting__mdt impl : impls) {
-            implByInterfaces.put(impl.Interface_Type__c, impl.ImplClassName__c);
+            implByInterfaces.put(impl.Label, impl.ImplClassName__c);
         }
+    }
 
-        String str = implByInterfaces.get(intfType.toString());
+    public ServiceConnection getInst(String implType) {
+        String str = implByInterfaces.get(implType.toString());
         Type typee = Type.forName(str);
 
         return (ServiceConnection) typee.newInstance();
     }
 
-    public static ServiceConnection overrideInst(Type intfType, Object mockImpl) {
-        if (implByInterfaces.containsKey(intfType.toString())) {
+    public ServiceConnection overrideInst(String implType,Object mockImpl) {
+        if (implByInterfaces.containsKey(implType.toString())) {
             return (ServiceConnection) mockImpl;
         }
         return null;

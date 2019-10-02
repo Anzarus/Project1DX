@@ -6,9 +6,11 @@
 private class ClientTest {
     @IsTest
     static void testBehavior() {
-        ServiceConnection YandexManager = DI.getInst(ServiceConnection.class, 'yandex');
-        ServiceConnection GoogleManager = DI.getInst(ServiceConnection.class, 'google');
-        ServiceConnection OneDriveManager = DI.getInst(ServiceConnection.class, 'oneDrive');
+        DI di = new DI(ServiceConnection.class);
+
+        ServiceConnection YandexManager = di.getInst('yandex');
+        ServiceConnection GoogleManager = di.getInst('google');
+        ServiceConnection OneDriveManager = di.getInst('oneDrive');
 
         System.assertEquals(YandexManager.getFileDownloadLink(''),'Get YandexDisk File Link');
         System.assertEquals(YandexManager.deleteFile(''),'Delete File From YandexDisk');
@@ -25,8 +27,10 @@ private class ClientTest {
 
     @IsTest
     static void testMockBehavior() {
-        ServiceConnection YandexManager = DI.getInst(ServiceConnection.class, 'yandex');
-        YandexManager = DI.overrideInst(ServiceConnection.class, new testImpl());
+        DI di = new DI(ServiceConnection.class);
+
+        ServiceConnection YandexManager = di.getInst('yandex');
+        YandexManager = di.overrideInst('yandex', new testImpl());
 
         System.assertEquals(YandexManager.getFileDownloadLink(''),'1');
         System.assertEquals(YandexManager.sendFile(''),'2');
