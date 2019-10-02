@@ -4,7 +4,7 @@
 
 public with sharing class DI {
 
-    private static Map<Type, Map<String, String>> implByInterfaces = new Map<Type, Map<String, String>>();
+    private static Map<ComplexKey, String> implByInterfaces = new Map<ComplexKey, String>();
 
     static {
         initDI();
@@ -12,39 +12,62 @@ public with sharing class DI {
 
     private static void initDI() {
         List<Product_File_Setting__mdt> impls = [
-                SELECT Interface_Type__c, Label, ImplClassName__c
+                SELECT Label, Interface_Type__c, ImplClassName__c
                 FROM Product_File_Setting__mdt
         ];
         for (Product_File_Setting__mdt impl : impls) {
-            if (!implByInterfaces.containsKey(Type.forName(impl.Interface_Type__c))) {
-                implByInterfaces.put(Type.forName(impl.Interface_Type__c), new Map<String, String>{
-                        impl.Label => impl.ImplClassName__c
-                });
-            } else {
-                implByInterfaces.get(Type.forName(impl.Interface_Type__c)).put(impl.Label, impl.ImplClassName__c);
-            }
+            implByInterfaces.put(
+                    new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label),
+                    impl.ImplClassName__c);
         }
     }
 
     public static Object getInst(Type interfaceType, String implType) {
-        if (implByInterfaces.containsKey(interfaceType)) {
-            if (implByInterfaces.get(interfaceType).containsKey(implType)) {
-                try {
-                    return Type.forName(implByInterfaces.get(interfaceType).get(implType)).newInstance();
-                } catch (NullPointerException e) {
-                    e.setMessage('Impl has not been found!');
-                }
+        ComplexKey key = findComplexKey(interfaceType, implType);
+        if (implByInterfaces.containsKey(key)) {
+            try {
+                System.debug(implByInterfaces);
+                return Type.forName(implByInterfaces.get(key)).newInstance();
+            } catch (NullPointerException e) {
+                e.setMessage('Impl has not been found!');
             }
         }
         throw new NullPointerException();
     }
 
     public static void overrideInst(Type interfaceType, String implType, Type mockImpl) {
-        if (implByInterfaces.containsKey(interfaceType)) {
-            if (implByInterfaces.get(interfaceType).containsKey(implType)) {
-                implByInterfaces.get(interfaceType).remove(implType);
-                implByInterfaces.get(interfaceType).put(implType, mockImpl.toString());
+        ComplexKey key = findComplexKey(interfaceType, implType);
+        if (implByInterfaces.containsKey(key)) {
+            implByInterfaces.remove(key);
+            implByInterfaces.put(key, mockImpl.toString());
+        }
+    }
+
+    private static ComplexKey findComplexKey(Type type, String implLabel) {
+        for (ComplexKey key : implByInterfaces.keySet()) {
+            if (key.getType().equals(type)
+                    && key.getImplLabel() == implLabel) {
+                return key;
             }
+        }
+        return null;
+    }
+
+    private class ComplexKey {
+        private Type type;
+        private String implLabel;
+
+        ComplexKey(Type type, String implLabel) {
+            this.type = type;
+            this.implLabel = implLabel;
+        }
+
+        Type getType() {
+            return this.type;
+        }
+
+        String getImplLabel() {
+            return this.implLabel;
         }
     }
 }
