@@ -7,16 +7,20 @@ public with sharing class DI {
     private Map<String, String> implByInterfaces;
 
     public DI(Type interfaceType) {
-        this.implByInterfaces = new Map<String, String>();
+        this.implByInterfaces = putImplsToMap(interfaceType);
+    }
 
+    private Map<String, String> putImplsToMap(Type interfaceType) {
+        Map<String, String> buffMap = new Map<String, String>();
         List<Product_File_Setting__mdt> impls = [
                 SELECT Label, ImplClassName__c
                 FROM Product_File_Setting__mdt
                 WHERE Interface_Type__c = :interfaceType.toString()
         ];
         for (Product_File_Setting__mdt impl : impls) {
-            implByInterfaces.put(impl.Label, impl.ImplClassName__c);
+            buffMap.put(impl.Label, impl.ImplClassName__c);
         }
+        return buffMap;
     }
 
     public ServiceConnection getInst(String implType) {
@@ -26,7 +30,7 @@ public with sharing class DI {
         return (ServiceConnection) typee.newInstance();
     }
 
-    public ServiceConnection overrideInst(String implType,Object mockImpl) {
+    public ServiceConnection overrideInst(String implType, Object mockImpl) {
         if (implByInterfaces.containsKey(implType.toString())) {
             return (ServiceConnection) mockImpl;
         }
