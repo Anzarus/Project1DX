@@ -4,7 +4,7 @@
 
 public with sharing class DI {
 
-    private static Map<ComplexKey, String> implByInterfaces = new Map<ComplexKey, String>();
+    private static Map<Integer, String> implByInterfaces = new Map<Integer, String>();
 
     static {
         initDI();
@@ -17,40 +17,26 @@ public with sharing class DI {
         ];
         for (Product_File_Setting__mdt impl : impls) {
             implByInterfaces.put(
-                    new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label),
+                    new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label).hashCode(),
                     impl.ImplClassName__c);
         }
     }
 
     public static Object getInst(Type interfaceType, String implType) {
-        ComplexKey key = findComplexKey(interfaceType, implType);
+        Integer key = new ComplexKey(interfaceType, implType).hashCode();
         if (implByInterfaces.containsKey(key)) {
-            try {
-                System.debug(implByInterfaces);
-                return Type.forName(implByInterfaces.get(key)).newInstance();
-            } catch (NullPointerException e) {
-                e.setMessage('Impl has not been found!');
-            }
+            System.debug(implByInterfaces);
+            return Type.forName(implByInterfaces.get(key)).newInstance();
         }
-        throw new NullPointerException();
+        throw new DIException('Impl has not been found!');
     }
 
     public static void overrideInst(Type interfaceType, String implType, Type mockImpl) {
-        ComplexKey key = findComplexKey(interfaceType, implType);
+        Integer key = new ComplexKey(interfaceType, implType).hashCode();
         if (implByInterfaces.containsKey(key)) {
             implByInterfaces.remove(key);
             implByInterfaces.put(key, mockImpl.toString());
         }
-    }
-
-    private static ComplexKey findComplexKey(Type type, String implLabel) {
-        for (ComplexKey key : implByInterfaces.keySet()) {
-            if (key.getType().equals(type)
-                    && key.getImplLabel() == implLabel) {
-                return key;
-            }
-        }
-        return null;
     }
 
     private class ComplexKey {
@@ -62,12 +48,11 @@ public with sharing class DI {
             this.implLabel = implLabel;
         }
 
-        Type getType() {
-            return this.type;
+        Integer hashCode() {
+            return type.hashCode() * implLabel.hashCode();
         }
+    }
 
-        String getImplLabel() {
-            return this.implLabel;
-        }
+    private class DIException extends Exception {
     }
 }

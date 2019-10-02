@@ -15,20 +15,10 @@ private class DITest {
     }
 
     @IsTest
-    static void testMapNullPointerBehavior() {
+    static void testDIExceptionBehavior() {
         try {
             DI.getInst(ServiceConnection.class, 'test');
-        } catch (NullPointerException e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
-        }
-    }
-
-    @IsTest
-    static void testImplNullPointerBehavior() {
-        try {
-            DI.overrideInst(ServiceConnection.class, 'yandex', DITest.class);
-            DI.getInst(ServiceConnection.class, 'yandex');
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             System.assertEquals(e.getMessage(), e.getMessage());
         }
     }
