@@ -24,14 +24,11 @@ public with sharing class DI {
     }
 
     public ServiceConnection getInst(String implType) {
-        String str = implByInterfaces.get(implType.toString());
-        Type typee = Type.forName(str);
-
-        return (ServiceConnection) typee.newInstance();
+        return (ServiceConnection) Type.forName(implByInterfaces.get(implType)).newInstance();
     }
 
     public ServiceConnection overrideInst(String implType, Object mockImpl) {
-        if (implByInterfaces.containsKey(implType.toString())) {
+        if (implByInterfaces.containsKey(implType)) {
             return (ServiceConnection) mockImpl;
         }
         return null;
