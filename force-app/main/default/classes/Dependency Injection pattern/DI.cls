@@ -4,7 +4,7 @@
 
 public with sharing class DI {
 
-    private static Map<Integer, String> implByInterfaces = new Map<Integer, String>();
+    private static Map<ComplexKey, String> implByInterfaces = new Map<ComplexKey, String>();
 
     static {
         initDI();
@@ -17,13 +17,13 @@ public with sharing class DI {
         ];
         for (Product_File_Setting__mdt impl : impls) {
             implByInterfaces.put(
-                    new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label).hashCode(),
+                    new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label),
                     impl.ImplClassName__c);
         }
     }
 
     public static Object getInst(Type interfaceType, String implType) {
-        Integer key = new ComplexKey(interfaceType, implType).hashCode();
+        ComplexKey key = new ComplexKey(interfaceType, implType);
         if (implByInterfaces.containsKey(key)) {
             System.debug(implByInterfaces);
             return Type.forName(implByInterfaces.get(key)).newInstance();
@@ -32,7 +32,7 @@ public with sharing class DI {
     }
 
     public static void overrideInst(Type interfaceType, String implType, Type mockImpl) {
-        Integer key = new ComplexKey(interfaceType, implType).hashCode();
+        ComplexKey key = new ComplexKey(interfaceType, implType);
         if (implByInterfaces.containsKey(key)) {
             implByInterfaces.remove(key);
             implByInterfaces.put(key, mockImpl.toString());
@@ -41,15 +41,26 @@ public with sharing class DI {
 
     private class ComplexKey {
         private Type type;
-        private String implLabel;
+        private String impl;
 
         ComplexKey(Type type, String implLabel) {
             this.type = type;
-            this.implLabel = implLabel;
+            this.impl = implLabel;
+        }
+
+        Boolean equals(Object that) {
+            if (that != null && that instanceof ComplexKey) {
+                ComplexKey thatKey = (ComplexKey) that;
+                return type == thatKey.type
+                        && impl == thatKey.impl;
+            }
+            return false;
         }
 
         Integer hashCode() {
-            return type.hashCode() * implLabel.hashCode();
+            Integer h = 17 + 31 * type.hashCode();
+            h += 31 * impl.hashCode();
+            return h;
         }
     }
 
