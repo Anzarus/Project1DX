@@ -25,8 +25,11 @@ public with sharing class DI {
     public static Object getInst(Type interfaceType, String implType) {
         ComplexKey key = new ComplexKey(interfaceType, implType);
         if (implByInterfaces.containsKey(key)) {
-            System.debug(implByInterfaces);
-            return Type.forName(implByInterfaces.get(key)).newInstance();
+            try {
+                return Type.forName(implByInterfaces.get(key)).newInstance();
+            } catch (DIException e) {
+                e.setMessage('Class do not exist!');
+            }
         }
         throw new DIException('Impl has not been found!');
     }
