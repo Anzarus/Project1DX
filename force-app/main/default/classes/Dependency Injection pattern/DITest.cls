@@ -6,9 +6,8 @@
 private class DITest {
     @IsTest
     static void testMockBehavior() {
-        DI.formMap((SOQLPostman) Test.createStub(SOQLPostman.class, new MockProvider()));
-        DI.overrideInst(ServiceConnection.class, 'test', ConnectionTestImpl.class);
-        ServiceConnection YandexManager = (ServiceConnection) DI.getInst(ServiceConnection.class, 'test');
+        DI.overrideInst(ServiceConnection.class, 'yandex', ConnectionTestImpl.class);
+        ServiceConnection YandexManager = (ServiceConnection) DI.getInst(ServiceConnection.class, 'yandex');
 
         System.assertEquals(YandexManager.getFileDownloadLink(''), '1');
         System.assertEquals(YandexManager.sendFile(''), '2');

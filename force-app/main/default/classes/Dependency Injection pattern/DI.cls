@@ -7,22 +7,14 @@ public with sharing class DI {
     private static Map<ComplexKey, String> implByInterfaces = new Map<ComplexKey, String>();
 
     static {
-        formMap(new SOQLPostman());
+        initDI();
     }
 
-    @TestVisible
-    private static void formMap(SOQLPostman postman) {
-        String query = new SOQLBuilder()
-                .setFrom(Product_File_Setting__mdt.SObjectType)
-                .setFields(new SObjectField[]{
-                        Product_File_Setting__mdt.Label,
-                        Product_File_Setting__mdt.Interface_Type__c,
-                        Product_File_Setting__mdt.ImplClassName__c
-                })
-                .build();
-
-        List<Product_File_Setting__mdt> impls = (List<Product_File_Setting__mdt>) postman.sendQuery(query);
-
+    private static void initDI() {
+        List<Product_File_Setting__mdt> impls = [
+                SELECT Label, Interface_Type__c, ImplClassName__c
+                FROM Product_File_Setting__mdt
+        ];
         for (Product_File_Setting__mdt impl : impls) {
             implByInterfaces.put(
                     new ComplexKey(Type.forName(impl.Interface_Type__c), impl.Label),

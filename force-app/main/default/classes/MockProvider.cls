@@ -18,13 +18,6 @@ public class MockProvider implements System.StubProvider {
                 return true;
             }
             return false;
-        } else if (stubbedMethodName == 'sendQuery') {
-            List<Product_File_Setting__mdt> products = new List<Product_File_Setting__mdt>{
-                    new Product_File_Setting__mdt(Label = 'test',
-                            Interface_Type__c = 'ServiceConnection',
-                            ImplClassName__c = 'testClass')
-            };
-            return products;
         } else if (stubbedMethodName == 'getCache') {
             String key1 = String.valueOf('/Document.docx'.hashCode());
             String key2 = String.valueOf('/Test1.1.odt'.hashCode());
