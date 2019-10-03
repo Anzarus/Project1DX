@@ -6,7 +6,7 @@
 private class DITest {
     @IsTest
     static void testMockBehavior() {
-        DI.soqlPostman = (SOQLPostman) Test.createStub(SOQLPostman.class, new MockProvider());
+        DI.formMap((SOQLPostman) Test.createStub(SOQLPostman.class, new MockProvider()));
         DI.overrideInst(ServiceConnection.class, 'yandexx', ConnectionTestImpl.class);
         ServiceConnection YandexManager = (ServiceConnection) DI.getInst(ServiceConnection.class, 'yandexx');
 

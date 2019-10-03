@@ -4,15 +4,14 @@
 
 public with sharing class DI {
 
-    @TestVisible
-    private static SOQLPostman soqlPostman = new SOQLPostman();
     private static Map<ComplexKey, String> implByInterfaces = new Map<ComplexKey, String>();
 
     static {
-        formMap();
+        formMap(new SOQLPostman());
     }
 
-    private static void formMap() {
+    @TestVisible
+    private static void formMap(SOQLPostman postman) {
         String query = new SOQLBuilder()
                 .setFrom(Product_File_Setting__mdt.SObjectType)
                 .setFields(new SObjectField[]{
@@ -22,7 +21,7 @@ public with sharing class DI {
                 })
                 .build();
 
-        List<Product_File_Setting__mdt> impls = (List<Product_File_Setting__mdt>) soqlPostman.sendQuery(query);
+        List<Product_File_Setting__mdt> impls = (List<Product_File_Setting__mdt>) postman.sendQuery(query);
 
         for (Product_File_Setting__mdt impl : impls) {
             implByInterfaces.put(
