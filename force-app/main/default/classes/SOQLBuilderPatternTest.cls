@@ -8,7 +8,9 @@ private class SOQLBuilderPatternTest {
     @IsTest
     static void testGeneratingSOQLForDifferentSObjects() {
         SObjectType sObjectType = Task.SObjectType;
-        List<SObjectField> sObjectFields = sObjectType.getDescribe().fields.getMap().values();
+        List<SObjectField> sObjectFields = new List<SObjectField>{
+                Task.AccountId, Task.Type, Task.CreatedById, Task.OwnerId
+        };
 
         SOQLBuilder builder = new SOQLBuilder();
 
@@ -26,16 +28,7 @@ private class SOQLBuilderPatternTest {
                 .setSecurityEnforced()
                 .build();
 
-        System.assertEquals('SELECT Id, WhoId, WhatId, Subject, ActivityDate,' +
-                ' Status, Priority, IsHighPriority, OwnerId, Description, Type,' +
-                ' IsDeleted, AccountId, IsClosed, CreatedDate, CreatedById,' +
-                ' LastModifiedDate, LastModifiedById, SystemModstamp, IsArchived,' +
-                ' CallDurationInSeconds, CallType, CallDisposition, CallObject,' +
-                ' ReminderDateTime, IsReminderSet, RecurrenceActivityId, IsRecurrence,' +
-                ' RecurrenceStartDateOnly, RecurrenceEndDateOnly, RecurrenceTimeZoneSidKey,' +
-                ' RecurrenceType, RecurrenceInterval, RecurrenceDayOfWeekMask,' +
-                ' RecurrenceDayOfMonth, RecurrenceInstance, RecurrenceMonthOfYear,' +
-                ' RecurrenceRegeneratedType, TaskSubtype, CompletedDateTime FROM Task', taskQuery);
+        System.assertEquals('SELECT AccountId, Type, CreatedById, OwnerId FROM Task', taskQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
@@ -66,14 +59,14 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnTypingNonValidValue() {
-            try {
-                new SOQLBuilder(true)
-                        .setField('566sccs')
-                        .setFrom(Contact.SObjectType)
-                        .build();
-            } catch (SOQLBuilder.BuilderSOQLException e) {
-                System.assertEquals(e.getMessage(), e.getMessage());
-            }
+        try {
+            new SOQLBuilder(true)
+                    .setField('566sccs')
+                    .setFrom(Contact.SObjectType)
+                    .build();
+        } catch (SOQLBuilder.BuilderSOQLException e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
     }
 
     @IsTest
@@ -120,7 +113,7 @@ private class SOQLBuilderPatternTest {
             try {
                 SObjectType sObjectType = Product2.SObjectType;
                 new SOQLBuilder()
-                        .setField(Product2.Price__c)
+                        .setField(Product2.IsActive)
                         .setFrom(sObjectType)
                         .build();
             } catch (NoAccessException e) {
@@ -135,7 +128,7 @@ private class SOQLBuilderPatternTest {
         System.runAs(user) {
             try {
                 new SOQLBuilder()
-                        .setField(Product2.Price__c)
+                        .setField(Product2.IsActive)
                         .setFrom('Product2')
                         .build();
             } catch (NoAccessException e) {
@@ -194,13 +187,11 @@ private class SOQLBuilderPatternTest {
     @IsTest
     static void testExceptionOnAccessToFieldIfRulesStrictUsingString() {
         User user = getTestUser();
-        insert user;
-
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
-                        .setField('WorkOrder.CaseId')
-                        .setFrom(Contact.SObjectType)
+                        .setField('Contact.LastName')
+                        .setFrom(Account.SObjectType)
                         .build();
             } catch (NoAccessException e) {
                 System.assertEquals(e.getMessage(), e.getMessage());
