@@ -20,9 +20,9 @@ public class MockProvider implements System.StubProvider {
             return false;
         } else if (stubbedMethodName == 'sendQuery') {
             List<Product_File_Setting__mdt> products = new List<Product_File_Setting__mdt>{
-                    new Product_File_Setting__mdt(Label = 'yandexx',
+                    new Product_File_Setting__mdt(Label = 'test',
                             Interface_Type__c = 'ServiceConnection',
-                            ImplClassName__c = 'YandexClass')
+                            ImplClassName__c = 'testClass')
             };
             return products;
         } else if (stubbedMethodName == 'getCache') {
