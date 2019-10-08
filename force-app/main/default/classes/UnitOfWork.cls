@@ -3,12 +3,10 @@
  */
 
 public with sharing class UnitOfWork {
-
     private Set<SObjectType> sObjectTypesToWorkWithDatabase;
 
     private Map<SObjectType, List<SObject>> toInsert;
     private Map<SObjectType, List<SObject>> toUpdate;
-//    private Map<SObjectType, List<SObject>> toUpsert;  todo: do we need upsert?
     private Map<SObjectType, List<SObject>> toDelete;
 
     private List<Relation> relationsToUpsert;
@@ -25,7 +23,6 @@ public with sharing class UnitOfWork {
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-
         for (SObject obj : sObjectsToInsert) {
             addToRelationList(obj, null, null, 'insert');
         }
@@ -38,7 +35,6 @@ public with sharing class UnitOfWork {
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-
         addToRelationList(sObjectToInsert, null, null, 'insert');
     }
 
@@ -49,7 +45,6 @@ public with sharing class UnitOfWork {
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-
         addToRelationList(child, childFieldToParent, parent, 'insert');
     }
 
@@ -60,7 +55,6 @@ public with sharing class UnitOfWork {
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-
         for (SObject obj : sObjectsToUpdate) {
             addToRelationList(obj, null, null, 'update');
         }
@@ -73,7 +67,6 @@ public with sharing class UnitOfWork {
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-
         addToRelationList(sObjectToUpdate, null, null, 'update');
     }
 
@@ -84,46 +77,34 @@ public with sharing class UnitOfWork {
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-
         addToRelationList(child, childFieldToParent, parent, 'update');
     }
-/*
 
     public void addToUpsert(List<SObject> sObjectsToUpsert) {
-        if (sObjectsToUpsert == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
-        }
-        if (toUpsert == null) {
-            toUpsert = new Map<SObjectType, List<SObject>>();
-        }
-
-        for (SObject obj : sObjectsToUpsert) {
-            addToRelationList(obj, null, null, 'upsert');
+        for (SObject sObj : sObjectsToUpsert) {
+            if (sObj.Id == null) {
+                addToInsert(sObj);
+            } else {
+                addToUpdate(sObj);
+            }
         }
     }
 
     public void addToUpsert(SObject sObjectToUpsert) {
-        if (sObjectToUpsert == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+        if (sObjectToUpsert.Id == null) {
+            addToInsert(sObjectToUpsert);
+        } else {
+            addToUpdate(sObjectToUpsert);
         }
-        if (toUpsert == null) {
-            toUpsert = new Map<SObjectType, List<SObject>>();
-        }
-
-        addToRelationList(sObjectToUpsert, null, null, 'upsert');
     }
 
     public void addToUpsert(SObject child, SObjectField childFieldToParent, SObject parent) {
-        if (child == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+        if (child.Id == null) {
+            addToInsert(child, childFieldToParent, parent);
+        } else {
+            addToUpdate(child, childFieldToParent, parent);
         }
-        if (toUpsert == null) {
-            toUpsert = new Map<SObjectType, List<SObject>>();
-        }
-
-        addToRelationList(child, childFieldToParent, parent, 'upsert');
     }
-*/
 
     public void addToDelete(List<SObject> sObjectsToDelete) {
         if (sObjectsToDelete == null) {
@@ -132,7 +113,6 @@ public with sharing class UnitOfWork {
         if (toDelete == null) {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
-
         for (SObject obj : sObjectsToDelete) {
             addToRelationList(obj, null, null, 'delete');
         }
@@ -145,7 +125,6 @@ public with sharing class UnitOfWork {
         if (toDelete == null) {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
-
         addToRelationList(sObjectToDelete, null, null, 'delete');
     }
 
@@ -162,15 +141,6 @@ public with sharing class UnitOfWork {
         }
         toUpdate.get(child.getSObjectType()).add(child);
     }
-/*
-
-    private void addToUpsertMap(SObject child) {
-        if (!toUpsert.containsKey(child.getSObjectType())) {
-            toUpsert.put(child.getSObjectType(), new List<SObject>());
-        }
-        toUpsert.get(child.getSObjectType()).add(child);
-    }
-*/
 
     private void addToDeleteMap(SObject child) {
         if (!toDelete.containsKey(child.getSObjectType())) {
@@ -194,10 +164,7 @@ public with sharing class UnitOfWork {
             }
             when 'update' {
                 addToUpdateMap(child);
-            }/*
-                when 'upsert' {
-                    addToUpsertMap(child);
-                }*/
+            }
             when 'delete' {
                 addToDeleteMap(child);
             }
@@ -224,10 +191,7 @@ public with sharing class UnitOfWork {
             }
             if (toUpdate != null && toUpdate.get(sObjectType) != null) {
                 tryToLoad(toUpdate.get(sObjectType), 'update');
-            }/*
-            if (toUpsert != null && toUpsert.get(sObjectType) != null) {
-                tryToLoad(toUpsert.get(sObjectType), 'upsert');
-            }*/
+            }
             if (toDelete != null && toDelete.get(sObjectType) != null) {
                 tryToLoad(toDelete.get(sObjectType), 'delete');
             }
@@ -253,10 +217,7 @@ public with sharing class UnitOfWork {
                 }
                 when 'update' {
                     update sObjects;
-                }/*
-                when 'upsert' {
-                    upsert sObjects;
-                }*/
+                }
                 when 'delete' {
                     delete sObjects;
                 }

@@ -227,7 +227,7 @@ private class UnitOfWorkTest {
             System.assertEquals(e.getMessage(), e.getMessage());
         }
     }
-/*
+
     @IsTest
     static void testUpsertByOne() {
         testInsertByOne();
@@ -257,6 +257,41 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
+    static void testUpsertByOneWithRelations() {
+        testInsertByOne();
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Account.SObjectType, Contact.SObjectType
+                }
+        );
+
+        List<Account> accounts = [SELECT Name FROM Account];
+        List<Contact> contacts = [SELECT Name FROM Contact];
+
+        for (Account acc : accounts) {
+            acc.Name = 'new';
+            unitOfWork.addToUpsert(acc);
+        }
+        Contact c1;
+        for (Integer i = 0; i < 50; i++) {
+            c1 = new Contact(LastName = 'new');
+            unitOfWork.addToUpsert(c1, Contact.AccountId, accounts[0]);
+        }
+        for (Contact c2 : contacts){
+            c2.LastName = 'old';
+            unitOfWork.addToUpsert(c2, Contact.AccountId, accounts[1]);
+        }
+
+        unitOfWork.commitWork();
+
+        System.assertEquals(5, [SELECT Id FROM Account WHERE Name = :'new'].size());
+        System.assertEquals(5, [SELECT Id FROM Account].size());
+        System.assertEquals(50, [SELECT Id FROM Contact WHERE LastName = 'new' AND AccountId = :accounts[0].Id].size());
+        System.assertEquals(50, [SELECT Id FROM Contact WHERE LastName = 'old' AND AccountId = :accounts[1].Id].size());
+        System.assertEquals(100, [SELECT Id FROM Contact].size());
+    }
+
+    @IsTest
     static void testUpsertByList() {
         testInsertByList();
         UnitOfWork unitOfWork = new UnitOfWork(
@@ -278,36 +313,6 @@ private class UnitOfWorkTest {
         System.assertEquals(1, [SELECT Id FROM Lead WHERE LastName = :'old'].size());
         System.assertEquals(3, [SELECT Id FROM Lead].size());
     }
-
-    @IsTest
-    static void testUpsertOneNullPointerException() {
-        UnitOfWork unitOfWork = new UnitOfWork(
-                new Set<SObjectType>{
-                        Contact.SObjectType
-                }
-        );
-        try {
-            Contact cont;
-            unitOfWork.addToUpsert(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
-        }
-    }
-
-    @IsTest
-    static void testUpsertListNullPointerException() {
-        UnitOfWork unitOfWork = new UnitOfWork(
-                new Set<SObjectType>{
-                        Contact.SObjectType
-                }
-        );
-        try {
-            List<Contact> cont;
-            unitOfWork.addToUpsert(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
-        }
-    }*/
 
     @IsTest
     static void testDeleteByOne() {
