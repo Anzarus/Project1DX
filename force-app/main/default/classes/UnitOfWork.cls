@@ -12,75 +12,82 @@ public with sharing class UnitOfWork {
     private List<Relation> relationsToUpsert;
     private List<SObject> childrenWithRelationsToUpdate;
 
+    private enum TypeOfDMLOperation {
+        DML_Insert, DML_Update, DML_Delete
+    }
+
     public UnitOfWork(Set<SObjectType> sObjectTypes) {
         this.sObjectTypesToWorkWithDatabase = sObjectTypes;
     }
 
     public void addToInsert(List<SObject> sObjectsToInsert) {
-        if (sObjectsToInsert == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+        if (sObjectsToInsert == null || sObjectsToInsert.size() == 0) {
+            throw new UnitOfWorkException('The list should be initialized and have at list one value!');
         }
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToInsert) {
-            addToRelationList(obj, null, null, 'insert');
+            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Insert);
         }
     }
 
     public void addToInsert(SObject sObjectToInsert) {
         if (sObjectToInsert == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('SObject could not be null!');
         }
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToInsert, null, null, 'insert');
+        addToRelationList(sObjectToInsert, null, null, TypeOfDMLOperation.DML_Insert);
     }
 
     public void addToInsert(SObject child, SObjectField childFieldToParent, SObject parent) {
         if (child == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('Child could not be null!');
         }
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(child, childFieldToParent, parent, 'insert');
+        addToRelationList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Insert);
     }
 
     public void addToUpdate(List<SObject> sObjectsToUpdate) {
-        if (sObjectsToUpdate == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+        if (sObjectsToUpdate == null || sObjectsToUpdate.size() == 0) {
+            throw new UnitOfWorkException('The list should be initialized and have at list one value!');
         }
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToUpdate) {
-            addToRelationList(obj, null, null, 'update');
+            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Update);
         }
     }
 
     public void addToUpdate(SObject sObjectToUpdate) {
         if (sObjectToUpdate == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('SObject could not be null!');
         }
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToUpdate, null, null, 'update');
+        addToRelationList(sObjectToUpdate, null, null, TypeOfDMLOperation.DML_Update);
     }
 
     public void addToUpdate(SObject child, SObjectField childFieldToParent, SObject parent) {
         if (child == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('Child could not be null!');
         }
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(child, childFieldToParent, parent, 'update');
+        addToRelationList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Update);
     }
 
     public void addToUpsert(List<SObject> sObjectsToUpsert) {
+        if (sObjectsToUpsert == null || sObjectsToUpsert.size() == 0) {
+            throw new UnitOfWorkException('The list should be initialized and have at list one value!');
+        }
         for (SObject sObj : sObjectsToUpsert) {
             if (sObj.Id == null) {
                 addToInsert(sObj);
@@ -91,6 +98,9 @@ public with sharing class UnitOfWork {
     }
 
     public void addToUpsert(SObject sObjectToUpsert) {
+        if (sObjectToUpsert == null) {
+            throw new UnitOfWorkException('SObject could not be null!');
+        }
         if (sObjectToUpsert.Id == null) {
             addToInsert(sObjectToUpsert);
         } else {
@@ -99,6 +109,9 @@ public with sharing class UnitOfWork {
     }
 
     public void addToUpsert(SObject child, SObjectField childFieldToParent, SObject parent) {
+        if (child == null) {
+            throw new UnitOfWorkException('Child could not be null!');
+        }
         if (child.Id == null) {
             addToInsert(child, childFieldToParent, parent);
         } else {
@@ -107,25 +120,25 @@ public with sharing class UnitOfWork {
     }
 
     public void addToDelete(List<SObject> sObjectsToDelete) {
-        if (sObjectsToDelete == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+        if (sObjectsToDelete == null || sObjectsToDelete.size() == 0) {
+            throw new UnitOfWorkException('The list should be initialized and have at list one value!');
         }
         if (toDelete == null) {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToDelete) {
-            addToRelationList(obj, null, null, 'delete');
+            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Delete);
         }
     }
 
     public void addToDelete(SObject sObjectToDelete) {
         if (sObjectToDelete == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('SObject could not be null!');
         }
         if (toDelete == null) {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToDelete, null, null, 'delete');
+        addToRelationList(sObjectToDelete, null, null, TypeOfDMLOperation.DML_Delete);
     }
 
     private void addToInsertMap(SObject child) {
@@ -151,21 +164,22 @@ public with sharing class UnitOfWork {
 
     public void registerRelations(SObject child, SObjectField childFieldToParent, SObject parent) {
         if (child == null) {
-            throw new UnitOfWorkException('Null pointer Exception!');
+            throw new UnitOfWorkException('Child could not be null!');
         }
-        addToRelationList(child, childFieldToParent, parent, '');
+        addToRelationList(child, childFieldToParent, parent, null);
     }
 
-    private void addToRelationList(SObject child, SObjectField childFieldToParent, SObject parent, String operation) {
+    private void addToRelationList(SObject child,
+            SObjectField childFieldToParent, SObject parent, TypeOfDMLOperation operation) {
         isTypeNotMentioned(child);
         switch on operation {
-            when 'insert' {
+            when DML_Insert {
                 addToInsertMap(child);
             }
-            when 'update' {
+            when DML_Update {
                 addToUpdateMap(child);
             }
-            when 'delete' {
+            when DML_Delete {
                 addToDeleteMap(child);
             }
         }
@@ -180,20 +194,20 @@ public with sharing class UnitOfWork {
     @TestVisible
     private void isTypeNotMentioned(SObject obj) {
         if (!sObjectTypesToWorkWithDatabase.contains(obj.getSObjectType())) {
-            throw new UnitOfWorkException('SObject type has not been mentioned!');
+            throw new UnitOfWorkException('SObjectType has not been mentioned!');
         }
     }
 
     public void commitWork() {
         for (SObjectType sObjectType : sObjectTypesToWorkWithDatabase) {
             if (toInsert != null && toInsert.get(sObjectType) != null) {
-                tryToLoad(toInsert.get(sObjectType), 'insert');
+                tryToLoad(toInsert.get(sObjectType), TypeOfDMLOperation.DML_Insert);
             }
             if (toUpdate != null && toUpdate.get(sObjectType) != null) {
-                tryToLoad(toUpdate.get(sObjectType), 'update');
+                tryToLoad(toUpdate.get(sObjectType), TypeOfDMLOperation.DML_Update);
             }
             if (toDelete != null && toDelete.get(sObjectType) != null) {
-                tryToLoad(toDelete.get(sObjectType), 'delete');
+                tryToLoad(toDelete.get(sObjectType), TypeOfDMLOperation.DML_Delete);
             }
         }
 
@@ -204,25 +218,22 @@ public with sharing class UnitOfWork {
             for (Relation relation : relationsToUpsert) {
                 childrenWithRelationsToUpdate.add(relation.addChildObjectWithField());
             }
-            tryToLoad(childrenWithRelationsToUpdate, 'relations');
+            tryToLoad(childrenWithRelationsToUpdate, TypeOfDMLOperation.DML_Update);
         }
     }
 
-    private void tryToLoad(List<SObject> sObjects, String operation) {
+    private void tryToLoad(List<SObject> sObjects, TypeOfDMLOperation operation) {
         Savepoint savepoint = Database.setSavepoint();
         try {
             switch on operation {
-                when 'insert' {
+                when DML_Insert {
                     insert sObjects;
                 }
-                when 'update' {
+                when DML_Update {
                     update sObjects;
                 }
-                when 'delete' {
+                when DML_Delete {
                     delete sObjects;
-                }
-                when 'relations' {
-                    update sObjects;
                 }
             }
         } catch (Exception e) {
@@ -238,7 +249,7 @@ public with sharing class UnitOfWork {
 
         Relation(SObject child, SObjectField childFieldToParent, SObject parent) {
             if (isFieldNotCorrect(child, childFieldToParent, parent)) {
-                throw new UnitOfWorkException('Wrong field!');
+                throw new UnitOfWorkException('Wrong child field!');
             }
             this.child = child;
             this.childFieldToParent = childFieldToParent;
