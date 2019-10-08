@@ -29,28 +29,6 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testInsertByOneWithRelations() {
-        UnitOfWork unitOfWork = new UnitOfWork(
-                new Set<SObjectType>{
-                        Account.SObjectType, Contact.SObjectType
-                }
-        );
-
-        Account acc = new Account(Name = 'Account');
-        insert acc;
-
-        Contact cont;
-        for (Integer j = 0; j < 10; j++) {
-            cont = new Contact(LastName = acc.Name + ':Contact' + j);
-            unitOfWork.addToInsert(cont, Contact.AccountId, acc);
-        }
-
-        unitOfWork.commitWork();
-
-        System.assertEquals(10, [SELECT Id, AccountId FROM Contact WHERE AccountId = :acc.Id].size());
-    }
-
-    @IsTest
     static void testInsertByList() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
@@ -78,8 +56,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.addToInsert(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('SObject could not be null!', e.getMessage());
         }
     }
 
@@ -93,8 +71,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.addToInsert(cont, Contact.AccountId, new Account());
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('Child could not be null!', e.getMessage());
         }
     }
 
@@ -108,8 +86,8 @@ private class UnitOfWorkTest {
         try {
             List<Contact> cont;
             unitOfWork.addToInsert(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('The list should be initialized and have at list one value!', e.getMessage());
         }
     }
 
@@ -193,8 +171,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.addToUpdate(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('SObject could not be null!', e.getMessage());
         }
     }
 
@@ -208,8 +186,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.addToUpdate(cont, Contact.AccountId, new Account());
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('Child could not be null!', e.getMessage());
         }
     }
 
@@ -223,8 +201,8 @@ private class UnitOfWorkTest {
         try {
             List<Contact> cont;
             unitOfWork.addToUpdate(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('The list should be initialized and have at list one value!', e.getMessage());
         }
     }
 
@@ -277,7 +255,7 @@ private class UnitOfWorkTest {
             c1 = new Contact(LastName = 'new');
             unitOfWork.addToUpsert(c1, Contact.AccountId, accounts[0]);
         }
-        for (Contact c2 : contacts){
+        for (Contact c2 : contacts) {
             c2.LastName = 'old';
             unitOfWork.addToUpsert(c2, Contact.AccountId, accounts[1]);
         }
@@ -312,6 +290,51 @@ private class UnitOfWorkTest {
         System.assertEquals(2, [SELECT Id FROM Lead WHERE LastName = :'new'].size());
         System.assertEquals(1, [SELECT Id FROM Lead WHERE LastName = :'old'].size());
         System.assertEquals(3, [SELECT Id FROM Lead].size());
+    }
+
+    @IsTest
+    static void testUpsertByOneNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            Contact cont;
+            unitOfWork.addToUpsert(cont);
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('SObject could not be null!', e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testUpsertByOneWithRelationsNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            Contact cont;
+            unitOfWork.addToUpsert(cont, Contact.AccountId, new Account());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('Child could not be null!', e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testUpsertByListNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            List<Contact> cont;
+            unitOfWork.addToUpsert(cont);
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('The list should be initialized and have at list one value!', e.getMessage());
+        }
     }
 
     @IsTest
@@ -364,8 +387,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.addToDelete(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('SObject could not be null!', e.getMessage());
         }
     }
 
@@ -379,8 +402,8 @@ private class UnitOfWorkTest {
         try {
             List<Contact> cont;
             unitOfWork.addToDelete(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('The list should be initialized and have at list one value!', e.getMessage());
         }
     }
 
@@ -415,8 +438,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont;
             unitOfWork.registerRelations(cont, Contact.AccountId, new Account());
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('Child could not be null!', e.getMessage());
         }
     }
 
@@ -429,8 +452,8 @@ private class UnitOfWorkTest {
         );
         try {
             unitOfWork.registerRelations(new Contact(), Opportunity.AccountId, new Contact());
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('Wrong child field!', e.getMessage());
         }
     }
 
@@ -441,13 +464,15 @@ private class UnitOfWorkTest {
                         Contact.SObjectType
                 }
         );
+        Boolean isExc = false;
         try {
             Contact cont = new Contact();
             unitOfWork.addToDelete(cont);
             unitOfWork.commitWork();
         } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+            isExc = true;
         }
+        System.assertEquals(true, isExc, 'Error cause of invalid DML operation!');
     }
 
     @IsTest
@@ -460,8 +485,8 @@ private class UnitOfWorkTest {
         try {
             Contact cont = new Contact(LastName = 'Contact');
             unitOfWork.isTypeNotMentioned(cont);
-        } catch (Exception e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+        } catch (UnitOfWork.UnitOfWorkException e) {
+            System.assertEquals('SObjectType has not been mentioned!', e.getMessage());
         }
     }
 }

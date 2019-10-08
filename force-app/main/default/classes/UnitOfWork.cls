@@ -267,6 +267,7 @@ public with sharing class UnitOfWork {
         }
     }
 
+    @TestVisible
     private class UnitOfWorkException extends Exception {
     }
 }
