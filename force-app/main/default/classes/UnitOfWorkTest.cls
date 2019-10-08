@@ -29,6 +29,28 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
+    static void testInsertByOneWithRelations() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Account.SObjectType, Contact.SObjectType
+                }
+        );
+
+        Account acc = new Account(Name = 'Account');
+        insert acc;
+
+        Contact cont;
+        for (Integer j = 0; j < 10; j++) {
+            cont = new Contact(LastName = acc.Name + ':Contact' + j);
+            unitOfWork.addToInsert(cont, Contact.AccountId, acc);
+        }
+
+        unitOfWork.commitWork();
+
+        System.assertEquals(10, [SELECT Id, AccountId FROM Contact WHERE AccountId = :acc.Id].size());
+    }
+
+    @IsTest
     static void testInsertByList() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
@@ -47,7 +69,7 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testInsertOneNullPointerException() {
+    static void testInsertByOneNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -62,7 +84,22 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testInsertListNullPointerException() {
+    static void testInsertByOneWithRelationsNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            Contact cont;
+            unitOfWork.addToInsert(cont, Contact.AccountId, new Account());
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testInsertByListNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -104,6 +141,29 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
+    static void testUpdateByOneWithRelations() {
+        testInsertByOne();
+
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Account.SObjectType, Contact.SObjectType
+                }
+        );
+
+        List<Account> accounts = [SELECT Name FROM Account];
+        List<Contact> contacts = [SELECT LastName FROM Contact];
+
+        for (Contact cont : contacts) {
+            cont.LastName = 'new';
+            unitOfWork.addToUpdate(cont, Contact.AccountId, accounts[0]);
+        }
+        unitOfWork.commitWork();
+
+        System.assertEquals(50,
+                [SELECT Id FROM Contact WHERE LastName = :'new' AND AccountId = :accounts[0].Id].size());
+    }
+
+    @IsTest
     static void testUpdateByList() {
         testInsertByList();
 
@@ -124,7 +184,7 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testUpdateOneNullPointerException() {
+    static void testUpdateByOneNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -139,7 +199,22 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testUpdateListNullPointerException() {
+    static void testUpdateByOneWithRelationsNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            Contact cont;
+            unitOfWork.addToUpdate(cont, Contact.AccountId, new Account());
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testUpdateByListNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -275,7 +350,7 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testDeleteOneNullPointerException() {
+    static void testDeleteByOneNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -290,7 +365,7 @@ private class UnitOfWorkTest {
     }
 
     @IsTest
-    static void testDeleteListNullPointerException() {
+    static void testDeleteByListNullPointerException() {
         UnitOfWork unitOfWork = new UnitOfWork(
                 new Set<SObjectType>{
                         Contact.SObjectType
@@ -299,6 +374,56 @@ private class UnitOfWorkTest {
         try {
             List<Contact> cont;
             unitOfWork.addToDelete(cont);
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testRegisterNewRelations() {
+        testInsertByOne();
+
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Account.SObjectType, Contact.SObjectType
+                }
+        );
+
+        List<Account> accounts = [SELECT Id FROM Account];
+        List<Contact> contacts = [SELECT AccountId FROM Contact];
+
+        for (Contact cont : contacts) {
+            unitOfWork.registerRelations(cont, Contact.AccountId, accounts[0]);
+        }
+        unitOfWork.commitWork();
+
+        System.assertEquals(50, [SELECT Id FROM Contact WHERE AccountId = :accounts[0].Id].size());
+    }
+
+    @IsTest
+    static void testRegisterNewRelationsNullPointerException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            Contact cont;
+            unitOfWork.registerRelations(cont, Contact.AccountId, new Account());
+        } catch (Exception e) {
+            System.assertEquals(e.getMessage(), e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void testRegisterNewRelationsWrongFieldException() {
+        UnitOfWork unitOfWork = new UnitOfWork(
+                new Set<SObjectType>{
+                        Contact.SObjectType
+                }
+        );
+        try {
+            unitOfWork.registerRelations(new Contact(), Opportunity.AccountId, new Contact());
         } catch (Exception e) {
             System.assertEquals(e.getMessage(), e.getMessage());
         }

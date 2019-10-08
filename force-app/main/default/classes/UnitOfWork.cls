@@ -12,6 +12,7 @@ public with sharing class UnitOfWork {
     private Map<SObjectType, List<SObject>> toDelete;
 
     private List<Relation> relationsToUpsert;
+    private List<SObject> childrenWithRelationsToUpdate;
 
     public UnitOfWork(Set<SObjectType> sObjectTypes) {
         this.sObjectTypesToWorkWithDatabase = sObjectTypes;
@@ -178,28 +179,36 @@ public with sharing class UnitOfWork {
         toDelete.get(child.getSObjectType()).add(child);
     }
 
+    public void registerRelations(SObject child, SObjectField childFieldToParent, SObject parent) {
+        if (child == null) {
+            throw new UnitOfWorkException('Null pointer Exception!');
+        }
+        addToRelationList(child, childFieldToParent, parent, '');
+    }
+
     private void addToRelationList(SObject child, SObjectField childFieldToParent, SObject parent, String operation) {
         isTypeNotMentioned(child);
-        if (childFieldToParent == null && parent == null) {
-            switch on operation {
-                when 'insert' {
-                    addToInsertMap(child);
-                }
-                when 'update' {
-                    addToUpdateMap(child);
-                }/*
+        switch on operation {
+            when 'insert' {
+                addToInsertMap(child);
+            }
+            when 'update' {
+                addToUpdateMap(child);
+            }/*
                 when 'upsert' {
                     addToUpsertMap(child);
                 }*/
-                when 'delete' {
-                    addToDeleteMap(child);
-                }
+            when 'delete' {
+                addToDeleteMap(child);
             }
-        } else {
-            if (relationsToUpsert == null) relationsToUpsert = new List<UnitOfWork.Relation>();
+        }
+        if (childFieldToParent != null && parent != null) {
+            if (relationsToUpsert == null) {
+                relationsToUpsert = new List<UnitOfWork.Relation>();
+            }
             relationsToUpsert.add(new Relation(child, childFieldToParent, parent));
         }
-    }//todo relations
+    }
 
     @TestVisible
     private void isTypeNotMentioned(SObject obj) {
@@ -223,6 +232,16 @@ public with sharing class UnitOfWork {
                 tryToLoad(toDelete.get(sObjectType), 'delete');
             }
         }
+
+        if (relationsToUpsert != null) {
+            if (childrenWithRelationsToUpdate == null) {
+                childrenWithRelationsToUpdate = new List<SObject>();
+            }
+            for (Relation relation : relationsToUpsert) {
+                childrenWithRelationsToUpdate.add(relation.addChildObjectWithField());
+            }
+            tryToLoad(childrenWithRelationsToUpdate, 'relations');
+        }
     }
 
     private void tryToLoad(List<SObject> sObjects, String operation) {
@@ -241,6 +260,9 @@ public with sharing class UnitOfWork {
                 when 'delete' {
                     delete sObjects;
                 }
+                when 'relations' {
+                    update sObjects;
+                }
             }
         } catch (Exception e) {
             Database.rollback(savepoint);
@@ -254,7 +276,7 @@ public with sharing class UnitOfWork {
         private SObject parent;
 
         Relation(SObject child, SObjectField childFieldToParent, SObject parent) {
-            if (isFieldNotCorrect(child, childFieldToParent)) {
+            if (isFieldNotCorrect(child, childFieldToParent, parent)) {
                 throw new UnitOfWorkException('Wrong field!');
             }
             this.child = child;
@@ -262,8 +284,14 @@ public with sharing class UnitOfWork {
             this.parent = parent;
         }
 
-        private Boolean isFieldNotCorrect(SObject child, SObjectField childFieldToParent) {
-            return !child.getSObjectType().getDescribe().fields.getMap().values().contains(childFieldToParent);
+        private Boolean isFieldNotCorrect(SObject child, SObjectField childFieldToParent, SObject parent) {
+            return !child.getSObjectType().getDescribe().fields.getMap().values().contains(childFieldToParent)
+                    && !childFieldToParent.getDescribe().referenceTo.contains(parent.getSObjectType());
+        }
+
+        SObject addChildObjectWithField() {
+            child.put(childFieldToParent, parent.Id);
+            return child;
         }
     }
 
