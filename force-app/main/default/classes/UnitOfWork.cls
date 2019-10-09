@@ -10,6 +10,7 @@ public with sharing class UnitOfWork {
     private Map<SObjectType, List<SObject>> toDelete;
 
     private List<Relation> relationsToUpsert;
+    private Map<SObjectType, List<Relation>> relationsToInsertWithSObject;
     private List<SObject> childrenWithRelationsToUpdate;
 
     private enum TypeOfDMLOperation {
@@ -175,6 +176,7 @@ public with sharing class UnitOfWork {
         switch on operation {
             when DML_Insert {
                 addToInsertMap(child);
+                addRelationOnInsert(child, childFieldToParent, parent);
             }
             when DML_Update {
                 addToUpdateMap(child);
@@ -191,6 +193,17 @@ public with sharing class UnitOfWork {
         }
     }
 
+    private void addRelationOnInsert(SObject child,
+            SObjectField childFieldToParent, SObject parent) {
+        if (relationsToInsertWithSObject == null) {
+            relationsToInsertWithSObject = new Map<SObjectType, List<UnitOfWork.Relation>>();
+        }
+        if (!relationsToInsertWithSObject.containsKey(parent.getSObjectType())) {
+            relationsToInsertWithSObject.put(parent.getSObjectType(), new List<Relation>());
+        }
+        relationsToInsertWithSObject.get(parent.getSObjectType()).add(new Relation(child, childFieldToParent, parent));
+    }
+
     @TestVisible
     private void isTypeNotMentioned(SObject obj) {
         if (!sObjectTypesToWorkWithDatabase.contains(obj.getSObjectType())) {
@@ -202,6 +215,7 @@ public with sharing class UnitOfWork {
         for (SObjectType sObjectType : sObjectTypesToWorkWithDatabase) {
             if (toInsert != null && toInsert.get(sObjectType) != null) {
                 tryToLoad(toInsert.get(sObjectType), TypeOfDMLOperation.DML_Insert);
+                setChildFieldsToInsert(sObjectType, toInsert.get(sObjectType));
             }
             if (toUpdate != null && toUpdate.get(sObjectType) != null) {
                 tryToLoad(toUpdate.get(sObjectType), TypeOfDMLOperation.DML_Update);
@@ -239,6 +253,14 @@ public with sharing class UnitOfWork {
         } catch (Exception e) {
             Database.rollback(savepoint);
             throw e;
+        }
+    }
+
+    private void setChildFieldsToInsert(SObjectType parentSObjectType, List<SObject> parents) {
+        if (relationsToInsertWithSObject.containsKey(parentSObjectType)) {
+            for (Relation relation : relationsToInsertWithSObject.get(parentSObjectType)){
+                toInsert.get(relation.child.getSObjectType());
+            }//todo list relations list relationsToInsert
         }
     }
 
