@@ -29,7 +29,7 @@ public with sharing class UnitOfWork {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToInsert) {
-            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Insert);
+            addToSObjectToCorrectList(obj, null, null, TypeOfDMLOperation.DML_Insert);
         }
     }
 
@@ -40,7 +40,7 @@ public with sharing class UnitOfWork {
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToInsert, null, null, TypeOfDMLOperation.DML_Insert);
+        addToSObjectToCorrectList(sObjectToInsert, null, null, TypeOfDMLOperation.DML_Insert);
     }
 
     public void addToInsert(SObject child, SObjectField childFieldToParent, SObject parent) {
@@ -50,7 +50,7 @@ public with sharing class UnitOfWork {
         if (toInsert == null) {
             toInsert = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Insert);
+        addToSObjectToCorrectList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Insert);
     }
 
     public void addToUpdate(List<SObject> sObjectsToUpdate) {
@@ -61,7 +61,7 @@ public with sharing class UnitOfWork {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToUpdate) {
-            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Update);
+            addToSObjectToCorrectList(obj, null, null, TypeOfDMLOperation.DML_Update);
         }
     }
 
@@ -72,7 +72,7 @@ public with sharing class UnitOfWork {
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToUpdate, null, null, TypeOfDMLOperation.DML_Update);
+        addToSObjectToCorrectList(sObjectToUpdate, null, null, TypeOfDMLOperation.DML_Update);
     }
 
     public void addToUpdate(SObject child, SObjectField childFieldToParent, SObject parent) {
@@ -82,7 +82,7 @@ public with sharing class UnitOfWork {
         if (toUpdate == null) {
             toUpdate = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Update);
+        addToSObjectToCorrectList(child, childFieldToParent, parent, TypeOfDMLOperation.DML_Update);
     }
 
     public void addToUpsert(List<SObject> sObjectsToUpsert) {
@@ -128,7 +128,7 @@ public with sharing class UnitOfWork {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
         for (SObject obj : sObjectsToDelete) {
-            addToRelationList(obj, null, null, TypeOfDMLOperation.DML_Delete);
+            addToSObjectToCorrectList(obj, null, null, TypeOfDMLOperation.DML_Delete);
         }
     }
 
@@ -139,7 +139,7 @@ public with sharing class UnitOfWork {
         if (toDelete == null) {
             toDelete = new Map<SObjectType, List<SObject>>();
         }
-        addToRelationList(sObjectToDelete, null, null, TypeOfDMLOperation.DML_Delete);
+        addToSObjectToCorrectList(sObjectToDelete, null, null, TypeOfDMLOperation.DML_Delete);
     }
 
     private void addToInsertMap(SObject child) {
@@ -167,30 +167,38 @@ public with sharing class UnitOfWork {
         if (child == null) {
             throw new UnitOfWorkException('Child could not be null!');
         }
-        addToRelationList(child, childFieldToParent, parent, null);
+        addToSObjectToCorrectList(child, childFieldToParent, parent, null);
     }
 
-    private void addToRelationList(SObject child,
-            SObjectField childFieldToParent, SObject parent, TypeOfDMLOperation operation) {
+    private void addToSObjectToCorrectList(SObject child, SObjectField childFieldToParent, SObject parent,
+            TypeOfDMLOperation operation) {
         isTypeNotMentioned(child);
-        switch on operation {
-            when DML_Insert {
-                addToInsertMap(child);
-                addRelationOnInsert(child, childFieldToParent, parent);
-            }
-            when DML_Update {
-                addToUpdateMap(child);
-            }
-            when DML_Delete {
-                addToDeleteMap(child);
-            }
-        }
         if (childFieldToParent != null && parent != null) {
-            if (relationsToUpsert == null) {
-                relationsToUpsert = new List<UnitOfWork.Relation>();
+            if (operation == TypeOfDMLOperation.DML_Insert) {
+                addRelationOnInsert(child, childFieldToParent, parent);
+            } else {
+                addRelationsToUpdate(child, childFieldToParent, parent);
             }
-            relationsToUpsert.add(new Relation(child, childFieldToParent, parent));
+        } else {
+            switch on operation {
+                when DML_Insert {
+                    addToInsertMap(child);
+                }
+                when DML_Update {
+                    addToUpdateMap(child);
+                }
+                when DML_Delete {
+                    addToDeleteMap(child);
+                }
+            }
         }
+    }
+
+    private void addRelationsToUpdate(SObject child, SObjectField childFieldToParent, SObject parent) {
+        if (relationsToUpsert == null) {
+            relationsToUpsert = new List<UnitOfWork.Relation>();
+        }
+        relationsToUpsert.add(new Relation(child, childFieldToParent, parent));
     }
 
     private void addRelationOnInsert(SObject child,
@@ -215,10 +223,11 @@ public with sharing class UnitOfWork {
         for (SObjectType sObjectType : sObjectTypesToWorkWithDatabase) {
             if (toInsert != null && toInsert.get(sObjectType) != null) {
                 tryToLoad(toInsert.get(sObjectType), TypeOfDMLOperation.DML_Insert);
-                setChildFieldsToInsert(sObjectType, toInsert.get(sObjectType));
+                setChildFieldsToInsert(sObjectType);
             }
             if (toUpdate != null && toUpdate.get(sObjectType) != null) {
                 tryToLoad(toUpdate.get(sObjectType), TypeOfDMLOperation.DML_Update);
+                setChildFieldsToInsert(sObjectType);
             }
             if (toDelete != null && toDelete.get(sObjectType) != null) {
                 tryToLoad(toDelete.get(sObjectType), TypeOfDMLOperation.DML_Delete);
@@ -256,11 +265,12 @@ public with sharing class UnitOfWork {
         }
     }
 
-    private void setChildFieldsToInsert(SObjectType parentSObjectType, List<SObject> parents) {
-        if (relationsToInsertWithSObject.containsKey(parentSObjectType)) {
-            for (Relation relation : relationsToInsertWithSObject.get(parentSObjectType)){
-                toInsert.get(relation.child.getSObjectType());
-            }//todo list relations list relationsToInsert
+    private void setChildFieldsToInsert(SObjectType parentSObjectType) {
+        if (relationsToInsertWithSObject != null
+                && relationsToInsertWithSObject.containsKey(parentSObjectType)) {
+            for (Relation relation : relationsToInsertWithSObject.get(parentSObjectType)) {
+                addToInsert(relation.addChildObjectWithField());
+            }
         }
     }
 
