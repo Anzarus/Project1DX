@@ -1,0 +1,41 @@
+<!--
+ - Created by AntonAntoniuk on 18.10.2019.
+ -->
+
+<!-- List Of Items -->
+<template>
+    <div class="slds-border--bottom slds-text-align_center">Items</div>
+    <div>
+        <template for:each={itemsForThisPage} for:item="item">
+            <c-item-view item={item} key={item.Id}>
+            </c-item-view>
+        </template>
+    </div>
+    <div class="slds-border--top">
+        <template if:true={isNotFirstPage}>
+            <lightning-button-icon alternative-text="toBegin"
+                                   icon-name="utility:back"
+                                   onclick={handleFirstPage}>
+            </lightning-button-icon>
+        </template>
+
+        <lightning-button-icon alternative-text="Previous"
+                               icon-name="utility:chevronleft"
+                               onclick={handlePreviousPage}>
+        </lightning-button-icon>
+        <div class="slds-text-align_center">
+            current/total
+        </div>
+        <lightning-button-icon alternative-text="Next"
+                               icon-name="utility:chevronright"
+                               onclick={handleNextPage}>
+        </lightning-button-icon>
+
+        <template if:true={isNotLastPage}>
+            <lightning-button-icon alternative-text="toEnd"
+                                   icon-name="utility:forward"
+                                   onclick={handleLastPage}>
+            </lightning-button-icon>
+        </template>
+    </div>
+</template>
