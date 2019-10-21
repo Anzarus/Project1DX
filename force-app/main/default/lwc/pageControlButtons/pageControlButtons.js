@@ -9,8 +9,12 @@ export default class PageControlButtons extends LightningElement {
     @api currentPage;
     @api totalCountOfPages;
 
-    get showPreviousNext() {
-        return this.totalCountOfPages > 1;
+    get showPrevious() {
+        return this.totalCountOfPages > 1 && this.currentPage !== 1;
+    }
+
+    get showNext() {
+        return this.totalCountOfPages > 1 && this.currentPage !== this.totalCountOfPages;
     }
 
     get showToFirst() {
@@ -22,18 +26,18 @@ export default class PageControlButtons extends LightningElement {
     }
 
     handleFirstPage() {
-        this.dispatchEvent(new CustomEvent('first'))
+        this.dispatchEvent(new CustomEvent('first'));
     }
 
     handlePreviousPage() {
-        this.dispatchEvent(new CustomEvent('previous'))
+        this.dispatchEvent(new CustomEvent('previous'));
     }
 
     handleNextPage() {
-        this.dispatchEvent(new CustomEvent('next'))
+        this.dispatchEvent(new CustomEvent('next'));
     }
 
     handleLastPage() {
-        this.dispatchEvent(new CustomEvent('last'))
+        this.dispatchEvent(new CustomEvent('last'));
     }
 }

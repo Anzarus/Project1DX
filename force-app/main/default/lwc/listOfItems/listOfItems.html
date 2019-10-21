@@ -6,11 +6,11 @@
 <template>
     <div class="slds-border--bottom slds-text-align_center">Items</div>
     <template if:false={itemsUndefined}>
-        <div>
-            <template for:each={itemsForThisPage} for:item="item">
-                <c-item-view item={item} key={item.Id}>
-                </c-item-view>
-            </template>
-        </div>
+        <template for:each={itemsForThisPage} for:item="item">
+            <c-item-view item={item}
+                         key={item.Id}
+                         onselected={handleSelectedEvent}>
+            </c-item-view>
+        </template>
     </template>
 </template>

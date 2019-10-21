@@ -4,4 +4,39 @@
 
 <!-- Item Details -->
 <template>
+    <template if:false={isCurrentItemUndefined}>
+        <div class="slds-grid slds-grid_vertical slds-box custom-class-style-fill-block">
+            <div class="slds-col slds-text-heading--medium custom-box slds-align_absolute-center">
+                Name:&nbsp;{currentItem.Name}
+            </div>
+            <div class="slds-col custom-box slds-list_horizontal">
+                <div class="slds-size_1-of-2">
+                    Status:
+                    <div class={correctColor}>
+                        {currentItem.Status__c}
+                    </div>
+                </div>
+                <div class="slds-size_1-of-2">
+                    Price:
+                    <div class="custom-green-text">
+                        {currentItem.Price__c}&nbsp;$
+                    </div>
+                </div>
+            </div>
+            <div class="slds-col custom-box slds-list_horizontal">
+                <div class="slds-size_1-of-2">
+                    Product Code:
+                    {currentItem.ProductCode}
+                </div>
+                <div class="slds-size_1-of-2">
+                    Product Family:
+                    {currentItem.Family}
+                </div>
+            </div>
+            <div class="slds-col custom-box">
+                File Id:
+                {currentItem.File_Id__c}
+            </div>
+        </div>
+    </template>
 </template>

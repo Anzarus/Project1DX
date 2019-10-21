@@ -9,12 +9,14 @@ export default class ItemManagementComponent extends LightningElement {
 
     numberOfItemsOnPage = 10;
     totalCountOfPages;
-    currentPage = 1;
+    itemsByIds;
 
     @api recordId;
 
     @track items;
     @track error;
+    @track currentPage = 1;
+    @track currentItem;
 
     @wire(getItems, {recordId: '$recordId'}) wiredItems({error, data}) {//todo wrong послідовність
         if (data) {
@@ -56,6 +58,16 @@ export default class ItemManagementComponent extends LightningElement {
     }
 
     handleLast() {
-        this.currentPage = this.items.length - 1;
+        this.currentPage = this.totalCountOfPages;
+    }
+
+    handleItemEvent(itemevt) {
+        if (this.itemsByIds === undefined) {
+            this.itemsByIds = new Map();
+            for (let i = 0; i < this.items.length; i++) {
+                this.itemsByIds.set(this.items[i].Id, this.items[i]);
+            }
+        }
+        this.currentItem = this.itemsByIds.get(itemevt.detail);
     }
 }

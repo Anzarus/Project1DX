@@ -18,7 +18,7 @@ public with sharing class ItemManagementComponentController {
         }
 
         return [
-                SELECT Name, Price__c, Status__c
+                SELECT Name, Price__c, Status__c, ProductCode, Family, File_Id__c
                 FROM Product2
                 WHERE Id IN :pricebookEntriesProdIds
         ];

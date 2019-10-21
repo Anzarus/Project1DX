@@ -11,7 +11,7 @@
                                    onclick={handleFirstPage}>
             </lightning-button-icon>
         </template>
-        <template if:true={showPreviousNext}>
+        <template if:true={showPrevious}>
             <lightning-button-icon alternative-text="Previous"
                                    icon-name="utility:chevronleft"
                                    onclick={handlePreviousPage}>
@@ -22,7 +22,7 @@
             {currentPage} of {totalCountOfPages}
         </div>
 
-        <template if:true={showPreviousNext}>
+        <template if:true={showNext}>
             <lightning-button-icon alternative-text="Next"
                                    icon-name="utility:chevronright"
                                    onclick={handleNextPage}>

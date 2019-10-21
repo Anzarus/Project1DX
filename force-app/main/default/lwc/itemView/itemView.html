@@ -4,7 +4,25 @@
 
 <!-- Item View -->
 <template>
-    <div class="slds-card">
-        I`m Product
+    <div class="slds-box--small slds-box_link slds-box--border" onclick={handleOnclick}>
+        <div class="slds-grid slds-list_horizontal">
+            <div class="slds-size_2-of-3 slds-text-heading--medium">
+                &nbsp;{item.Name}
+            </div>
+            <div class="slds-size_1-of-3 slds-grid--vertical">
+                <div class="slds-col slds-list_horizontal">
+                    Status:&nbsp;
+                    <div class={correctColor}>
+                        {item.Status__c}
+                    </div>
+                </div>
+                <div class="slds-col slds-list_horizontal">
+                    Price:&nbsp;
+                    <div class="custom-green-text">
+                        {item.Price__c}$
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>

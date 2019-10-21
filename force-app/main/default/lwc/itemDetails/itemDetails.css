@@ -1,0 +1,12 @@
+/**
+ * Created by AntonAntoniuk on 21.10.2019.
+ */
+.custom-class-style-fill-block {
+    display: block;
+    height: 100%;
+}
+
+.custom-box{
+    padding: 1.25rem;
+    border-radius: 0.25rem;
+}

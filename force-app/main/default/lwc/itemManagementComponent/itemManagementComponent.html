@@ -6,8 +6,9 @@
 <template>
     <div class="slds-card">
         <div class="slds-grid">
-            <div class="slds-size_3-of-4 slds-border--right">
-                <c-list-of-items items-for-this-page={listOfItemsForThisPage}>
+            <div class="slds-size_1-of-2 slds-border--right">
+                <c-list-of-items items-for-this-page={listOfItemsForThisPage}
+                                 onitemevt={handleItemEvent}>
                 </c-list-of-items>
                 <c-page-control-buttons current-page={currentPage}
                                         total-count-of-pages={totalCountOfPages}
@@ -17,8 +18,8 @@
                                         onlast={handleLast}>
                 </c-page-control-buttons>
             </div>
-            <div class="slds-size_1-of-4">
-                <c-item-details>
+            <div class="slds-size_1-of-2">
+                <c-item-details current-item={currentItem}>
                 </c-item-details>
             </div>
         </div>

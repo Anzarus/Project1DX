@@ -12,5 +12,11 @@ export default class ListOfItems extends LightningElement {
         this.itemsForThisPage === undefined;
     }
 
-    //todo add event to show details of items
+    handleSelectedEvent(event){
+        const itemevt = new CustomEvent(
+            'itemevt', {detail : event.detail}
+        );
+
+        this.dispatchEvent(itemevt);
+    }
 }
