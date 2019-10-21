@@ -10,3 +10,15 @@
     padding: 1.25rem;
     border-radius: 0.25rem;
 }
+
+.custom-green-text {
+    color: green;
+}
+
+.custom-blue-text {
+    color: blue;
+}
+
+.custom-red-text {
+    color: red;
+}
