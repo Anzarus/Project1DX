@@ -4,7 +4,7 @@
 
 import {LightningElement, api} from 'lwc';
 
-export default class PageControlButtons extends LightningElement {
+export default class Paginator extends LightningElement {
 
     @api currentPage;
     @api totalCountOfPages;

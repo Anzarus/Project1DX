@@ -10,13 +10,13 @@
                 <c-list-of-items items-for-this-page={listOfItemsForThisPage}
                                  onitemevt={handleItemEvent}>
                 </c-list-of-items>
-                <c-page-control-buttons current-page={currentPage}
+                <c-paginator current-page={currentPage}
                                         total-count-of-pages={totalCountOfPages}
                                         onfirst={handleFirst}
                                         onprevious={handlePrevious}
                                         onnext={handleNext}
                                         onlast={handleLast}>
-                </c-page-control-buttons>
+                </c-paginator>
             </div>
             <div class="slds-size_1-of-2">
                 <c-item-details current-item={currentItem}>
