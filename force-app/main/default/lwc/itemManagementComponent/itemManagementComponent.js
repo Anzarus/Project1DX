@@ -7,6 +7,10 @@ import getItems from '@salesforce/apex/ItemManagementComponentController.getItem
 
 export default class ItemManagementComponent extends LightningElement {
 
+    numberOfItemsOnPage = 10;
+    totalCountOfPages;
+    currentPage = 1;
+
     @api recordId;
 
     @track items;
@@ -18,33 +22,33 @@ export default class ItemManagementComponent extends LightningElement {
             this.error = undefined;
             console.log('success');
             console.log(this.items);
-            // this.totalCountOfPages = this.numberOfPages();
+            this.totalCountOfPages = this.numberOfPages();
+            console.log(this.items.length);
+            console.log(this.totalCountOfPages)
         } else if (error) {
             this.error = error;
             this.items = undefined;
         }
     }
 
-    numberOfItemsOnPage = 10;
-    // totalCountOfPages;
-    currentPage = 1;
-
     get listOfItemsForThisPage() {
-        console.log('items');
-        console.log(this.items);
-        console.log('items.size');
-        console.log(this.items.size);
-        const firstItemIteratorOnPage = this.numberOfItemsOnPage * this.currentPage - 1;
-        const resultList = [];
-        for (let i = firstItemIteratorOnPage; i < firstItemIteratorOnPage + 10; i++) {
-            resultList.push(this.items[i]);
+        console.log('render');
+        if (this.items !== undefined) {
+            const firstItemIteratorOnPage = this.numberOfItemsOnPage * (this.currentPage - 1);
+            const resultList = [];
+            for (let i = firstItemIteratorOnPage; i < firstItemIteratorOnPage + 10; i++) {
+                if (i === this.items.length) break;
+                resultList.push(this.items[i]);
+                console.log(i);
+            }
+            console.log(resultList);
+            return resultList;
         }
-        return resultList;
     }
 
-    // numberOfPages() {
-    //     return Math.ceil(this.items.size / this.numberOfItemsOnPage);
-    // }
+    numberOfPages() {
+        return Math.ceil(this.items.length / this.numberOfItemsOnPage);
+    }
 
     handleFirst() {
         this.currentPage = 1;
@@ -59,6 +63,6 @@ export default class ItemManagementComponent extends LightningElement {
     }
 
     handleLast() {
-        this.currentPage = this.items.size - 1;
+        this.currentPage = this.items.length - 1;
     }
 }

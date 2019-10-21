@@ -8,12 +8,8 @@ export default class ListOfItems extends LightningElement {
 
     @api itemsForThisPage;
 
-    get isNotFirstPage() {
-        return this.currentPage !== 1;
-    }
-
-    get isNotLastPage() {
-        return this.currentPage !== this.totalCountOfPages;
+    get itemsUndefined() {
+        this.itemsForThisPage === undefined;
     }
 
     handleFirstPage() {
