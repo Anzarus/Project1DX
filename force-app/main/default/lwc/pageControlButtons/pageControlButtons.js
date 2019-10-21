@@ -20,4 +20,20 @@ export default class PageControlButtons extends LightningElement {
     get showToLast() {
         return this.currentPage !== this.totalCountOfPages && this.totalCountOfPages > 2;
     }
+
+    handleFirstPage() {
+        this.dispatchEvent(new CustomEvent('first'))
+    }
+
+    handlePreviousPage() {
+        this.dispatchEvent(new CustomEvent('previous'))
+    }
+
+    handleNextPage() {
+        this.dispatchEvent(new CustomEvent('next'))
+    }
+
+    handleLastPage() {
+        this.dispatchEvent(new CustomEvent('last'))
+    }
 }

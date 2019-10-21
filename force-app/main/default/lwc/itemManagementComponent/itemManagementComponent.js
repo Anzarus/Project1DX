@@ -20,11 +20,7 @@ export default class ItemManagementComponent extends LightningElement {
         if (data) {
             this.items = data;
             this.error = undefined;
-            console.log('success');
-            console.log(this.items);
             this.totalCountOfPages = this.numberOfPages();
-            console.log(this.items.length);
-            console.log(this.totalCountOfPages)
         } else if (error) {
             this.error = error;
             this.items = undefined;
@@ -32,16 +28,13 @@ export default class ItemManagementComponent extends LightningElement {
     }
 
     get listOfItemsForThisPage() {
-        console.log('render');
         if (this.items !== undefined) {
             const firstItemIteratorOnPage = this.numberOfItemsOnPage * (this.currentPage - 1);
             const resultList = [];
             for (let i = firstItemIteratorOnPage; i < firstItemIteratorOnPage + 10; i++) {
                 if (i === this.items.length) break;
                 resultList.push(this.items[i]);
-                console.log(i);
             }
-            console.log(resultList);
             return resultList;
         }
     }

@@ -7,14 +7,14 @@
     <div class="slds-card">
         <div class="slds-grid">
             <div class="slds-size_3-of-4 slds-border--right">
-                <c-list-of-items items-for-this-page={listOfItemsForThisPage}
-                                 onfirst={handleFirst}
-                                 onprevious={handlePrevious}
-                                 onnext={handleNext}
-                                 onlast={handleLast}>
+                <c-list-of-items items-for-this-page={listOfItemsForThisPage}>
                 </c-list-of-items>
                 <c-page-control-buttons current-page={currentPage}
-                                        total-count-of-pages={totalCountOfPages}>
+                                        total-count-of-pages={totalCountOfPages}
+                                        onfirst={handleFirst}
+                                        onprevious={handlePrevious}
+                                        onnext={handleNext}
+                                        onlast={handleLast}>
                 </c-page-control-buttons>
             </div>
             <div class="slds-size_1-of-4">

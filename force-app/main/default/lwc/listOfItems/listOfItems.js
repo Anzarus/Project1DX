@@ -12,21 +12,5 @@ export default class ListOfItems extends LightningElement {
         this.itemsForThisPage === undefined;
     }
 
-    handleFirstPage() {
-        this.dispatchEvent(new CustomEvent('first'))
-    }
-
-    handlePreviousPage() {
-        this.dispatchEvent(new CustomEvent('previous'))
-    }
-
-    handleNextPage() {
-        this.dispatchEvent(new CustomEvent('next'))
-    }
-
-    handleLastPage() {
-        this.dispatchEvent(new CustomEvent('last'))
-    }
-
     //todo add event to show details of items
 }
