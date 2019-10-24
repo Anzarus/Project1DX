@@ -2,16 +2,16 @@
  * Created by AntonAntoniuk on 23.10.2019.
  */
 
-global with sharing class RegistrationHandlerSAML implements Auth.SamlJitHandler {
+public with sharing class RegistrationHandlerSAML implements Auth.SamlJitHandler {
 
-    global User createUser(Id samlSsoProviderId, Id communityId, Id portalId,
+    public User createUser(Id samlSsoProviderId, Id communityId, Id portalId,
             String federationIdentifier, Map<String, String> attributes, String assertion) {
         User u = analyzeUser(federationIdentifier, attributes);
         handleJit(u, communityId, portalId, federationIdentifier, attributes);
         return u;
     }
 
-    global void updateUser(Id userId, Id samlSsoProviderId, Id communityId, Id portalId,
+    public void updateUser(Id userId, Id samlSsoProviderId, Id communityId, Id portalId,
             String federationIdentifier, Map<String, String> attributes, String assertion) {
         User u;
         try {
