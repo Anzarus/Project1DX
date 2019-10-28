@@ -5,83 +5,71 @@
 public with sharing class RegistrationHandlerAuth implements Auth.RegistrationHandler {
 
     public User createUser(Id portalId, Auth.UserData data) {
-        User u = analyzeUser(data);
-        handleUser(u.Username == null, u, data);
+        User u = findUser(data);
+        if (u == null) {
+            throw new RegistrationHandlerAuthException('This User can not be found!');
+        }
         return u;
     }
 
     public void updateUser(Id userId, Id portalId, Auth.UserData data) {
-        User u = new User(Id = userId);
-        handleUser(false, u, data);
-        update(u);
-    }
-
-    private void handleUser(Boolean create, User u, Auth.UserData data) {
-        if (create) {
-            if (canCreateUser(data)) {
-                setRequiredUserFieldsOnCreate(u, data);
-            }
+        User u = checkUser(userId, data);
+        if (u == null) {
+            throw new RegistrationHandlerAuthException('This User can not be found!');
         }
-        setRequiredMutableFields(u, data);
     }
 
-    private void setRequiredMutableFields(User u, Auth.UserData data) {
-        u.LastName = data.lastName;
-        u.FirstName = data.firstName;
-        u.Alias = data.lastName.length() > 5 ? data.lastName.substring(0, 5) : data.lastName;
+    private User findUser(Auth.UserData data) {
+        String federationId = getFederationId(data);
 
-        String uid = UserInfo.getUserId();
-        User currentUser = [
-                SELECT LocaleSidKey, LanguageLocaleKey, TimeZoneSidKey, EmailEncodingKey
-                FROM User
-                WHERE Id = :uid
-        ];
-        u.LanguageLocaleKey = currentUser.LanguageLocaleKey;
-        u.LocaleSidKey = currentUser.LocaleSidKey;
-        u.EmailEncodingKey = currentUser.EmailEncodingKey;
-        u.TimeZoneSidKey = currentUser.TimeZoneSidKey;
-    }
-
-    private void setRequiredUserFieldsOnCreate(User u, Auth.UserData data) {
-        Profile p = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
-
-        u.ProfileId = p.Id;
-        u.Username = data.email + getRandomNumberValue(5);
-        u.CommunityNickname = 'User' + getRandomNumberValue(20);
-        u.Email = data.email;
-    }
-
-    private User analyzeUser(Auth.UserData data) {
         List<User> users = [
-                SELECT Id, Username, Email
+                SELECT Id
                 FROM User
-                WHERE IsActive = TRUE AND (Username = :data.username OR Email = :data.email)
+                WHERE IsActive = TRUE
+                AND FederationIdentifier = :federationId
         ];
-        User u = new User();
+        User u;
         if (!users.isEmpty()) {
             u = users[0];
         }
         return u;
     }
 
-    private Boolean canCreateUser(Auth.UserData data) {
-        if (String.isEmpty(data.email)
-                || String.isEmpty(data.lastName)) {
-            throw new RegistrationHandlerAuthException('User cannot be created!'
-                    + 'Email:' + data.email
-                    + 'Last Name:' + data.lastName);
+    @TestVisible
+    private User checkUser(Id userId, Auth.UserData data) {
+        String federationId = getFederationId(data);
+
+        List<User> users = [
+                SELECT Id
+                FROM User
+                WHERE IsActive = TRUE
+                AND Id = :userId AND FederationIdentifier = :federationId
+        ];
+        User u;
+        if (!users.isEmpty()) {
+            u = users[0];
         }
-        return true;
+        return u;
     }
 
-    private String getRandomNumberValue(Integer length) {
-        String result = '';
-        for (Integer i = 0; i < length; i++) {
-            result += Integer.valueOf(9 * Math.random());
+    private String getFederationId(Auth.UserData data) {
+        String federationId = '';
+        if (data.provider == 'Google') {
+            federationId += 'google-oauth2|';
         }
-        return result;
+        federationId += data.identifier;
+        return federationId;
     }
 
+    @TestVisible
     private class RegistrationHandlerAuthException extends Exception {
     }
 }
+/*
+
+
+portalId++null
+++data++UserData%3A%5B
+attributeMap%3D%7B
+identifier%3D112533033905571486109%2C+
+provider%3DGoogle%2C+*/
