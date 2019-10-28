@@ -4,7 +4,7 @@
     <consumerKey>303738038914-uo4nnvn7clp1hrv6nkjoac0gdrah3fic.apps.googleusercontent.com</consumerKey>
     <consumerSecret>l3Z6JP1KKVyo9jg0XOSrRMimXeW3Nz4ZcEEY92ILatc=</consumerSecret>
     <defaultScopes>email openid profile</defaultScopes>
-    <executionUser>test-yk30hq7odu7v@example.com</executionUser>
+    <executionUser>test-3yknl5nctdww@example.com</executionUser>
     <friendlyName>GoogleLogin</friendlyName>
     <includeOrgIdInIdentifier>false</includeOrgIdInIdentifier>
     <logoutUrl>https://velocity-business-4553-dev-ed.my.salesforce.com.</logoutUrl>
