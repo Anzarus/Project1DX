@@ -1,0 +1,48 @@
+#
+# GitLab CI/CD Pipeline
+#
+before_script:
+    # Decrypt server key
+    - openssl enc -aes-256-cbc -md sha256 -salt -d -in assets/server.key.enc -out assets/server.key -k $SERVER_KEY_PASSWORD -pbkdf2
+    # Install jq, a json parsing library
+    - apt update && apt -y install jq
+    # Setup SFDX environment variables
+    # https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_cli_env_variables.htm
+    - export SALESFORCE_CLI_URL=https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+    - export SFDX_AUTOUPDATE_DISABLE=false
+    - export SFDX_USE_GENERIC_UNIX_KEYCHAIN=true
+    - export SFDX_DOMAIN_RETRY=600
+    - export SFDX_LOG_LEVEL=DEBUG
+    # Install Salesforce CLI
+    - mkdir sfdx
+    - wget -qO- $SALESFORCE_CLI_URL | tar xJ -C sfdx --strip-components 1
+    - './sfdx/install'
+    - export PATH=./sfdx/$(pwd):$PATH
+    # Output CLI version and plug-in information
+    - sfdx update
+    - sfdx --version
+    - sfdx plugins --core
+#
+# Define the stages of pipeline
+#
+stages:
+    - code-testing
+#
+# Create a scratch org for code testing
+#
+code-testing:
+    stage: code-testing
+    script:
+        # Authenticate to the Dev Hub using the server key
+        - sfdx force:auth:jwt:grant --setdefaultdevhubusername --clientid $SF_CONSUMER_KEY --jwtkeyfile assets/server.key --username $SF_USERNAME
+        # Create scratch org
+        - sfdx force:org:create --setdefaultusername --definitionfile config/project-scratch-def.json --wait 10 --durationdays 1
+        - sfdx force:org:display
+        # Push source to scratch org (this is with source code, all files, etc)
+        - sfdx force:source:push
+        # Add sample data into app
+        - sfdx force:data:tree:import -p data/Product2Cache__c.json
+        # Unit Testing
+        - sfdx force:apex:test:run --wait 10 --resultformat human --codecoverage --testlevel RunLocalTests
+        # Delete Scratch Org
+        - sfdx force:org:delete --noprompt
