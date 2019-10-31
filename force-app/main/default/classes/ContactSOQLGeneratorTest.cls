@@ -6,10 +6,11 @@
 private class ContactSOQLGeneratorTest {
     @IsTest
     static void testGettingContactSOQL() {
-
-        ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
-
-        String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
+        String resultSOQL;
+        User user = getTestUser(true);
+        System.runAs(user){
+            resultSOQL = new ContactSOQLGenerator().generateContactSOQLWithoutWhere();
+        }
 
         System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
                 ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
@@ -29,7 +30,7 @@ private class ContactSOQLGeneratorTest {
 
     @IsTest
     static void testExceptionSettingStrictRulesViaConstructor() {
-        User user = getTestUser();
+        User user = getTestUser(false);
         System.runAs(user) {
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
@@ -43,7 +44,7 @@ private class ContactSOQLGeneratorTest {
 
     @IsTest
     static void testExceptionSettingStrictRulesViaMethod() {
-        User user = getTestUser();
+        User user = getTestUser(false);
         System.runAs(user) {
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
@@ -57,7 +58,9 @@ private class ContactSOQLGeneratorTest {
         }
     }
 
-    private static User getTestUser() {
+    private static User getTestUser(Boolean isUserHaveAccess) {
+        Profile profile = isUserHaveAccess ? [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1]
+                : [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         Profile profile = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',

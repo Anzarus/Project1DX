@@ -34,7 +34,7 @@ private class CheckJobStatusUtilTest {
         List<Remove_Job__c> openJobs = new List<Remove_Job__c>{
                 new Remove_Job__c(JobId__c = 'dbjid:AABoqpEIEjq1'),
                 new Remove_Job__c(JobId__c = 'dbjid:other')
-        };
+        };//todo how to commit Platform events if it is possible
         insert openJobs;
 
         Test.startTest();
