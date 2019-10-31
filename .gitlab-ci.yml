@@ -41,7 +41,7 @@ code-testing:
         # Push source to scratch org (this is with source code, all files, etc)
         - sfdx force:source:push
         # Add sample data into app
-        - sfdx force:data:tree:import -p data/Product2Cache__c.json
+        - sfdx force:data:tree:import -f data/Product2Cache__c.json
         # Unit Testing
         - sfdx force:apex:test:run --wait 10 --resultformat human --codecoverage --testlevel RunLocalTests
         # Delete Scratch Org
