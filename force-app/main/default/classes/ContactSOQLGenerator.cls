@@ -31,6 +31,6 @@ public with sharing class ContactSOQLGenerator {
         }
 
         return 'SELECT ' + generatedSOQL.substring(0, generatedSOQL.length() - 2) +
-                ' FROM Contact ';
+                ' FROM Contact';
     }
 }

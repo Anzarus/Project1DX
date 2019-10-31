@@ -24,13 +24,13 @@ private class ContactSOQLGeneratorTest {
                 ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
                 ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
                 ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
-                ' CleanStatus, IndividualId FROM Contact ', resultSOQL);
+                ' CleanStatus, IndividualId FROM Contact', resultSOQL);
     }
 
     @IsTest
-    static void testExceptionSettingStrictRulesViaConstructor(){
+    static void testExceptionSettingStrictRulesViaConstructor() {
         User user = getTestUser();
-        System.runAs(user){
+        System.runAs(user) {
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
 

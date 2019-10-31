@@ -5,18 +5,13 @@
 @IsTest
 public class TestProductAndOppCreator {
     public static List<Product2> generateAndConnectProdToOpp(Integer countOfOpp, Integer prodPerOpp, Integer lowBorderOfPrice, Integer highBorderOfPrice) {
-        Pricebook2 standardPricebook2 = new Pricebook2(Name = 'Standard Price Book', Id = Test.getStandardPricebookId(), IsActive = true);
-        update standardPricebook2;
-
-        standardPricebook2 = [SELECT Id, IsStandard FROM Pricebook2 WHERE Id = :standardPricebook2.Id];
-
         List<Product2> product2s = generateAndGetProduct2s(prodPerOpp, lowBorderOfPrice, highBorderOfPrice);
         insert product2s;
 
-        List<PricebookEntry> pricebookEntries = generatePriceBookEntriesForProd(product2s, standardPricebook2);
+        List<PricebookEntry> pricebookEntries = generatePriceBookEntriesForProd(product2s);
         insert pricebookEntries;
 
-        List<Opportunity> opportunities = generateAndGetOpps(countOfOpp, standardPricebook2);
+        List<Opportunity> opportunities = generateAndGetOpps(countOfOpp);
         insert opportunities;
 
         List<OpportunityLineItem> oppLineItems = generateAndGetOppLineItems(countOfOpp, prodPerOpp, opportunities, product2s, pricebookEntries);
@@ -39,12 +34,12 @@ public class TestProductAndOppCreator {
         return product2s;
     }
 
-    private static List<PricebookEntry> generatePriceBookEntriesForProd(List<Product2> product2s, Pricebook2 pricebook2) {
+    private static List<PricebookEntry> generatePriceBookEntriesForProd(List<Product2> product2s) {
         List<PricebookEntry> pricebookEntries = new List<PricebookEntry>();
         PricebookEntry pricebookEntry;
         for (Product2 prod : product2s) {
             pricebookEntry = new PricebookEntry(UnitPrice = prod.Price__c, IsActive = true,
-                    Pricebook2Id = pricebook2.Id, Product2Id = prod.Id, UseStandardPrice = false);
+                    Pricebook2Id = Test.getStandardPricebookId(), Product2Id = prod.Id, UseStandardPrice = false);
             pricebookEntries.add(pricebookEntry);
         }
 
@@ -52,11 +47,11 @@ public class TestProductAndOppCreator {
     }
 
 
-    private static List<Opportunity> generateAndGetOpps(Integer countOfOpp, Pricebook2 pricebook2) {
+    private static List<Opportunity> generateAndGetOpps(Integer countOfOpp) {
         List<Opportunity> opportunities = new List<Opportunity>();
         Opportunity opp;
         for (Integer i = 0; i < countOfOpp; i++) {
-            opp = new Opportunity(Name = 'Test Opp ' + i, Pricebook2Id = pricebook2.Id,
+            opp = new Opportunity(Name = 'Test Opp ' + i, Pricebook2Id = Test.getStandardPricebookId(),
                     CloseDate = System.Date.today(), StageName = 'Prospecting', Total_Price__c = 0);
             opportunities.add(opp);
         }
