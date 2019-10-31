@@ -5,12 +5,11 @@
 @IsTest
 private class SOQLGeneratorTest {
     @IsTest
-    static void testGeneratingSOQLForProduct2() {
-        String resultTaskSOQL;
-        User user = getTestUser(true);
-        System.runAs(user){
-            resultTaskSOQL = new SOQLGenerator(Task.SObjectType).generateSOQL();
-        }
+    static void testGeneratingSOQLForProduct2 () {
+        SOQLGenerator soqlGenerator = new SOQLGenerator(Task.SObjectType);
+
+        String resultProduct2SOQL = soqlGenerator.generateSOQL();
+
         System.assertEquals('SELECT Id, WhoId, WhatId, Subject, ActivityDate,' +
                 ' Status, Priority, IsHighPriority, OwnerId, Description, Type,' +
                 ' IsDeleted, AccountId, IsClosed, CreatedDate, CreatedById,' +
@@ -20,16 +19,14 @@ private class SOQLGeneratorTest {
                 ' RecurrenceStartDateOnly, RecurrenceEndDateOnly, RecurrenceTimeZoneSidKey,' +
                 ' RecurrenceType, RecurrenceInterval, RecurrenceDayOfWeekMask,' +
                 ' RecurrenceDayOfMonth, RecurrenceInstance, RecurrenceMonthOfYear,' +
-                ' RecurrenceRegeneratedType, TaskSubtype, CompletedDateTime FROM Task ', resultTaskSOQL);
+                ' RecurrenceRegeneratedType, TaskSubtype, CompletedDateTime FROM Task ', resultProduct2SOQL);
     }
 
     @IsTest
-    static void testGeneratingSOQLForContact() {
-        String resultContactSOQL;
-        User user = getTestUser(true);
-        System.runAs(user){
-            resultContactSOQL = new SOQLGenerator(Contact.SObjectType).generateSOQL();
-        }
+    static void testGeneratingSOQLForContact(){
+        SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType);
+
+        String resultContactSOQL = soqlGenerator.generateSOQL();
 
         System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
                 ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
@@ -48,9 +45,9 @@ private class SOQLGeneratorTest {
     }
 
     @IsTest
-    static void testExceptionSettingStrictRulesViaConstructor() {
-        User user = getTestUser(false);
-        System.runAs(user) {
+    static void testExceptionSettingStrictRulesViaConstructor(){
+        User user = getTestUser();
+        System.runAs(user){
             try {
                 SOQLGenerator soqlGenerator = new SOQLGenerator(Contact.SObjectType, true);
 
@@ -63,7 +60,7 @@ private class SOQLGeneratorTest {
 
     @IsTest
     static void testExceptionSettingStrictRulesViaMethod() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 SOQLGenerator soqlGenerator = new SOQLGenerator(Product2.SObjectType);
@@ -77,9 +74,8 @@ private class SOQLGeneratorTest {
         }
     }
 
-    private static User getTestUser(Boolean isUserHaveAccess) {
-        Profile profile = isUserHaveAccess ? [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1]
-                : [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
+    private static User getTestUser() {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
                 EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,

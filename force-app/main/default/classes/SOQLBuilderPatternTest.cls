@@ -7,39 +7,31 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testGeneratingSOQLForDifferentSObjects() {
-        String taskQuery;
-        String contactQuery;
+        SObjectType sObjectType = Task.SObjectType;
+        List<SObjectField> sObjectFields = new List<SObjectField>{
+                Task.AccountId, Task.Type, Task.CreatedById, Task.OwnerId
+        };
 
-        User user = getTestUser(true);
-        System.runAs(user) {
-            SObjectType sObjectType = Task.SObjectType;
-            List<SObjectField> sObjectFields = new List<SObjectField>{
-                    Task.AccountId, Task.Type, Task.CreatedById, Task.OwnerId
-            };
+        SOQLBuilder builder = new SOQLBuilder();
 
-            SOQLBuilder builder = new SOQLBuilder();
+        String taskQuery = builder
+                .setFields(sObjectFields)
+                .setFrom(sObjectType)
+                .setFrom('Task')
+                .build();
 
-            taskQuery = builder
-                    .setFields(sObjectFields)
-                    .setFrom(sObjectType)
-                    .setFrom('Task')
-                    .build();
-
-            contactQuery = builder
-                    .reset()
-                    .setFrom('Contact')
-                    .setField(Contact.Id)
-                    .setField('Contact.LastName')
-                    .setSecurityEnforced()
-                    .build();
-        }
-
+        String contactQuery = builder
+                .reset()
+                .setFrom('Contact')
+                .setField(Contact.Id)
+                .setField('Contact.LastName')
+                .setSecurityEnforced()
+                .build();
 
         System.assertEquals('SELECT AccountId, Type, CreatedById, OwnerId FROM Task', taskQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
-
 
     @IsTest
     static void testGeneratingWithStrict() {
@@ -116,7 +108,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToObjectUsingSObjectType() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 SObjectType sObjectType = Product2.SObjectType;
@@ -132,7 +124,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToObjectUsingString() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder()
@@ -147,7 +139,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToObjectUsingStringInChildToParent() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder(true, true)
@@ -162,7 +154,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToFieldIfRulesStrictUsingArrayOfFieldTypes() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
@@ -179,7 +171,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToFieldIfRulesStrictUsingFieldType() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
@@ -194,7 +186,7 @@ private class SOQLBuilderPatternTest {
 
     @IsTest
     static void testExceptionOnAccessToFieldIfRulesStrictUsingString() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 new SOQLBuilder(true)
@@ -207,9 +199,8 @@ private class SOQLBuilderPatternTest {
         }
     }
 
-    private static User getTestUser(Boolean isUserHaveAccess) {
-        Profile profile = isUserHaveAccess ? [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1]
-                : [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
+    private static User getTestUser() {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
                 EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,

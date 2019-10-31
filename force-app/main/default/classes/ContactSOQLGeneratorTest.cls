@@ -6,31 +6,18 @@
 private class ContactSOQLGeneratorTest {
     @IsTest
     static void testGettingContactSOQL() {
-        String resultSOQL;
-        User user = getTestUser(true);
-        System.runAs(user){
-            resultSOQL = new ContactSOQLGenerator().generateContactSOQLWithoutWhere();
-        }
 
-        System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
-                ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
-                ' OtherState, OtherPostalCode, OtherCountry, OtherLatitude,' +
-                ' OtherLongitude, OtherGeocodeAccuracy, OtherAddress, MailingStreet,' +
-                ' MailingCity, MailingState, MailingPostalCode, MailingCountry,' +
-                ' MailingLatitude, MailingLongitude, MailingGeocodeAccuracy,' +
-                ' MailingAddress, Phone, Fax, MobilePhone, HomePhone, OtherPhone,' +
-                ' AssistantPhone, ReportsToId, Email, Title, Department, AssistantName,' +
-                ' LeadSource, Birthdate, Description, OwnerId, HasOptedOutOfEmail,' +
-                ' HasOptedOutOfFax, DoNotCall, CreatedDate, CreatedById, LastModifiedDate,' +
-                ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
-                ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
-                ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
-                ' CleanStatus, IndividualId FROM Contact', resultSOQL);
+        ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
+
+        String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
+
+        System.assertEquals('SELECT ' + Schema.SObjectType.Contact.fields.getMap().keySet()
+                + ' FROM Contact ', resultSOQL);
     }
 
     @IsTest
     static void testExceptionSettingStrictRulesViaConstructor() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
@@ -44,7 +31,7 @@ private class ContactSOQLGeneratorTest {
 
     @IsTest
     static void testExceptionSettingStrictRulesViaMethod() {
-        User user = getTestUser(false);
+        User user = getTestUser();
         System.runAs(user) {
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
@@ -58,9 +45,8 @@ private class ContactSOQLGeneratorTest {
         }
     }
 
-    private static User getTestUser(Boolean isUserHaveAccess) {
-        Profile profile = isUserHaveAccess ? [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1]
-                : [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
+    private static User getTestUser() {
+        Profile profile = [SELECT Id FROM Profile WHERE Name = 'Chatter Free User' LIMIT 1];
         User testUser = new User(LastName = 'Robinson', Alias = 'Robi', Email = 'antonantonuk1999@gmail.com',
                 Username = 'testUserProject1@gmail.com' + Datetime.now().getTime(), CommunityNickname = 'testUser',
                 EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US', LocaleSidKey = 'en_US', ProfileId = profile.Id,
