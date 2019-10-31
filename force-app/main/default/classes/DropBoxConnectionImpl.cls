@@ -68,7 +68,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         request.setBody('{\"async_job_id\": \"' + jobId + '\"}');
         HttpResponse response = http.send(request);
 
-        new HttpLogger().logHttpUsingPlatformEvent(request, response);
+//        new HttpLogger().logHttpUsingPlatformEvent(request, response);
 
         if (response.getStatusCode() == 200) {
             Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
