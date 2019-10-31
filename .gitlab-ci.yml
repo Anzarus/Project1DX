@@ -22,8 +22,8 @@ before_script:
     - sfdx update
     - sfdx --version
     - sfdx plugins --core
-    #- touch devhub_auth_url.txt & echo "$DEV_HUB_AUTH_URL" > devhub_auth_url.txt
-    #- sfdx force:auth:sfdxurl:store -f devhub_auth_url.txt -d -a HubOrg
+    - touch devhub_auth_url.txt & echo "$DEV_HUB_AUTH_URL" > devhub_auth_url.txt
+    - sfdx force:auth:sfdxurl:store -f devhub_auth_url.txt -d -a HubOrg
 #
 # Define the stages of pipeline
 #
@@ -36,7 +36,7 @@ code-testing:
     stage: code-testing
     script:
         # Authenticate to the Dev Hub using the server key
-        - sfdx force:auth:jwt:grant --setdefaultdevhubusername --clientid $SF_CONSUMER_KEY --jwtkeyfile assets/server.key --username $SF_USERNAME
+        #- sfdx force:auth:jwt:grant --setdefaultdevhubusername --clientid $SF_CONSUMER_KEY --jwtkeyfile assets/server.key --username $SF_USERNAME
         # Create scratch org
         - sfdx force:org:create --setdefaultusername --definitionfile config/project-scratch-def.json --wait 10 --durationdays 1
         - sfdx force:org:display
