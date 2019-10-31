@@ -23,7 +23,7 @@ before_script:
     - sfdx --version
     - sfdx plugins --core
     - touch devhub_auth_url.txt & echo "$DEV_HUB_AUTH_URL" > devhub_auth_url.txt
-    - sfdx force:auth:sfdxurl:store -f devhub_auth_url.txt -a HubOrg
+    - sfdx force:auth:sfdxurl:store -f devhub_auth_url.txt -a HubOrg -d
 #
 # Define the stages of pipeline
 #
