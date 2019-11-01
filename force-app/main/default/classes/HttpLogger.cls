@@ -4,6 +4,19 @@
 
 public with sharing class HttpLogger {
 
+    public void logHttpUsingPlatformEvent(Map<String, String> eventValues) {
+        Http_Event__e httpEvent = new Http_Event__e(
+                Request_Body__c = eventValues.get('RequestBody'),
+                Request_Header__c = eventValues.get('RequestHeader'),
+                Response_Body__c = eventValues.get('ResponseBody'),
+                Response_Header__c = eventValues.get('ResponseHeader'),
+                Status_Code__c = Decimal.valueOf(eventValues.get('StatusCode')),
+                Url__c = eventValues.get('Url')
+        );
+
+        publishEvent(httpEvent);
+    }
+
     public void logHttpUsingPlatformEvent(HttpRequest request, HttpResponse response) {
         List<String> responseHeaderKeys = response.getHeaderKeys();
         List<String> responseHeader = new List<String>();
@@ -20,6 +33,10 @@ public with sharing class HttpLogger {
                 Url__c = request.getEndpoint()
         );
 
+        publishEvent(httpEvent);
+    }
+
+    private void publishEvent(Http_Event__e httpEvent){
         EventBus.publish(httpEvent);
     }
 }

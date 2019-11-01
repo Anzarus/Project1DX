@@ -2,7 +2,7 @@
  * Created by AntonAntoniuk on 11.09.2019.
  */
 
-public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
+public with sharing class DropBoxConnectionImpl implements DropBoxConnection {//todo
 
     public String getDownloadLink(String pathToFile) {
         HttpRequest request = new HttpRequest();
@@ -58,7 +58,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         return bodyData;
     }
 
-    public Map<String, List<String>> checkDeletedStatus(String jobId) {
+    public Map<String, String> checkDeletedStatus(String jobId) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
 
@@ -68,47 +68,29 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         request.setBody('{\"async_job_id\": \"' + jobId + '\"}');
         HttpResponse response = http.send(request);
 
-//        new HttpLogger().logHttpUsingPlatformEvent(request, response);
+        new HttpLogger().logHttpUsingPlatformEvent(request, response);
 
         if (response.getStatusCode() == 200) {
-            Map<String, Object> resultMap = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-            String resultMessage = String.valueOf(resultMap.get('.tag'));
-            if (resultMessage == 'complete') {
-                List<Object> entries = (List<Object>) resultMap.get('entries');
-                return analyzeMessage(entries);
-            }
-            return null;
+            return formResultMap(response, request);
         } else {
             throw new DropBoxConnectionException(response.getBody());
-        }
+        }//todo redo to return all required values for log and body result
     }
 
-    private Map<String, List<String>> analyzeMessage(List<Object> entries) {
-        Map<String, Object> fileStatus;
-        List<String> successDeletedFiles = new List<String>();
-        for (Object obj : entries) {
-            fileStatus = (Map<String, Object>) obj;
-            if (fileStatus.get('.tag') == 'success') {
-                Map<String, Object> metadata = (Map<String, Object>) fileStatus.get('metadata');
-                successDeletedFiles.add(String.valueOf(metadata.get('path_display')));
-            }
+    private Map<String, String> formResultMap(HttpResponse response, HttpRequest request) {
+        List<String> responseHeader = new List<String>();
+        for (String str : response.getHeaderKeys()) {
+            responseHeader.add(str);
         }
-        System.debug(successDeletedFiles);
-        if (successDeletedFiles.size() == entries.size()) {
-            return new Map<String, List<String>>{
-                    'result' => new List<String>{
-                            'Success'
-                    },
-                    'successFiles' => successDeletedFiles
-            };
-        } else {
-            return new Map<String, List<String>>{
-                    'result' => new List<String>{
-                            'Failed'
-                    },
-                    'successFiles' => successDeletedFiles
-            };
-        }
+
+        Map<String, String> resultMap = new Map<String, String>();
+        resultMap.put('RequestBody', request.getBody());
+        resultMap.put('RequestHeader', request.getHeader('Content-Type'));
+        resultMap.put('ResponseBody', response.getBody());
+        resultMap.put('ResponseHeader', String.valueOf(responseHeader));
+        resultMap.put('StatusCode', String.valueOf(response.getStatusCode()));
+        resultMap.put('Url', request.getEndpoint());
+        return resultMap;
     }
 
     @TestVisible

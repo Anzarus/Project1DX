@@ -70,27 +70,13 @@ private class DropBoxConnectionTest {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
 
         Test.startTest();
-        Map<String, List<String>> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq');
-        Map<String, List<String>> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq1');
-        Map<String, List<String>> resultNull = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:other');
+        Map<String, String> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq');
+        Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq1');
+        Map<String, String> resultNull = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:other');
         Test.stopTest();
 
-        System.assertEquals(new Map<String, List<String>>{
-                'result' => new List<String>{
-                        'Success'
-                },
-                'successFiles' => new List<String>{
-                        '/file (1).txt', '/file (3).txt'
-                }
-        }, resultFullSuccess);
-        System.assertEquals(new Map<String, List<String>>{
-                'result' => new List<String>{
-                        'Failed'
-                },
-                'successFiles' => new List<String>{
-                        '/file (2).txt'
-                }
-        }, resultPartSuccess);
+        System.assertEquals(null, resultFullSuccess); //todo
+        System.assertEquals(null, resultPartSuccess); //todo
         System.assertEquals(null, resultNull);
     }
 
