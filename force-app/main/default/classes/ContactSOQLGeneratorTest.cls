@@ -9,24 +9,28 @@ private class ContactSOQLGeneratorTest {
 
         ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
 
-        String expectedResult = '';
-
-        for (SObjectField field : Schema.SObjectType.Contact.fields.getMap().values()) {
-            if (field.getDescribe().isAccessible()) {
-                expectedResult += field + ', ';
-            }
-        }
-
         String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
 
-        System.assertEquals('SELECT ' + expectedResult.substring(0, expectedResult.length() - 2)
-                + ' FROM Contact', resultSOQL);
+        System.assertEquals('SELECT Id, IsDeleted, MasterRecordId, AccountId,' +
+                ' LastName, FirstName, Salutation, Name, OtherStreet, OtherCity,' +
+                ' OtherState, OtherPostalCode, OtherCountry, OtherLatitude,' +
+                ' OtherLongitude, OtherGeocodeAccuracy, OtherAddress, MailingStreet,' +
+                ' MailingCity, MailingState, MailingPostalCode, MailingCountry,' +
+                ' MailingLatitude, MailingLongitude, MailingGeocodeAccuracy,' +
+                ' MailingAddress, Phone, Fax, MobilePhone, HomePhone, OtherPhone,' +
+                ' AssistantPhone, ReportsToId, Email, Title, Department, AssistantName,' +
+                ' LeadSource, Birthdate, Description, OwnerId, HasOptedOutOfEmail,' +
+                ' HasOptedOutOfFax, DoNotCall, CreatedDate, CreatedById, LastModifiedDate,' +
+                ' LastModifiedById, SystemModstamp, LastActivityDate, LastCURequestDate,' +
+                ' LastCUUpdateDate, LastViewedDate, LastReferencedDate, EmailBouncedReason,' +
+                ' EmailBouncedDate, IsEmailBounced, PhotoUrl, Jigsaw, JigsawContactId,' +
+                ' CleanStatus, IndividualId FROM Contact ', resultSOQL);
     }
 
     @IsTest
-    static void testExceptionSettingStrictRulesViaConstructor() {
+    static void testExceptionSettingStrictRulesViaConstructor(){
         User user = getTestUser();
-        System.runAs(user) {
+        System.runAs(user){
             try {
                 ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator(true);
 

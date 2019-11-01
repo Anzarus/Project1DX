@@ -9,7 +9,7 @@ private class SOQLBuilderPatternTest {
     static void testGeneratingSOQLForDifferentSObjects() {
         SObjectType sObjectType = Task.SObjectType;
         List<SObjectField> sObjectFields = new List<SObjectField>{
-                Task.Id, Task.AccountId, Task.CreatedById, Task.OwnerId
+                Task.AccountId, Task.Type, Task.CreatedById, Task.OwnerId
         };
 
         SOQLBuilder builder = new SOQLBuilder();
@@ -28,7 +28,7 @@ private class SOQLBuilderPatternTest {
                 .setSecurityEnforced()
                 .build();
 
-        System.assertEquals('SELECT Id, AccountId, CreatedById, OwnerId FROM Task', taskQuery);
+        System.assertEquals('SELECT AccountId, Type, CreatedById, OwnerId FROM Task', taskQuery);
 
         System.assertEquals('SELECT Id, Contact.LastName FROM Contact WITH SECURITY_ENFORCED', contactQuery);
     }
