@@ -2,7 +2,7 @@
  * Created by AntonAntoniuk on 24.09.2019.
  */
 
-public with sharing class CheckJobStatusUtil implements Queueable {
+public with sharing class CheckJobStatusUtil implements Queueable, Database.AllowsCallouts {
 
     private List<Remove_Job__c> openJobs;
 
@@ -31,7 +31,7 @@ public with sharing class CheckJobStatusUtil implements Queueable {
         }
         update openJobs;
 
-        if (![SELECT Id FROM Remove_Job__c LIMIT 1].isEmpty()) {
+        if (![SELECT Id FROM Remove_Job__c WHERE Status__c = 'New' LIMIT 1].isEmpty()) {
             System.enqueueJob(new CheckJobStatusUtil());
         }//todo redo to make a few record requests
     }
