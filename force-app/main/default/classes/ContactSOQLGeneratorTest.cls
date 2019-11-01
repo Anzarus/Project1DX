@@ -20,7 +20,7 @@ private class ContactSOQLGeneratorTest {
         String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
 
         System.assertEquals('SELECT ' + expectedResult.substring(0, expectedResult.length() - 2)
-                + ' FROM Contact ', resultSOQL);
+                + ' FROM Contact', resultSOQL);
     }
 
     @IsTest
