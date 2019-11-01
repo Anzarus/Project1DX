@@ -9,9 +9,17 @@ private class ContactSOQLGeneratorTest {
 
         ContactSOQLGenerator contactSOQLGenerator = new ContactSOQLGenerator();
 
+        String expectedResult = '';
+
+        for (SObjectField field : Schema.SObjectType.Contact.fields.getMap().values()) {
+            if (field.getDescribe().isAccessible()) {
+                expectedResult += field + ', ';
+            }
+        }
+
         String resultSOQL = contactSOQLGenerator.generateContactSOQLWithoutWhere();
 
-        System.assertEquals('SELECT ' + Schema.SObjectType.Contact.fields.getMap().keySet()
+        System.assertEquals('SELECT ' + expectedResult.substring(0, expectedResult.length() - 2)
                 + ' FROM Contact ', resultSOQL);
     }
 
