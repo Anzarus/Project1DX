@@ -14,7 +14,8 @@ private class CheckJobStatusUtilTest {
         insert openJobs;
 
         Test.startTest();
-        CheckJobStatusUtil.checkDeletionStatus();
+        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
+        System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
         Remove_Job__c removeJob = [
@@ -34,11 +35,12 @@ private class CheckJobStatusUtilTest {
         List<Remove_Job__c> openJobs = new List<Remove_Job__c>{
                 new Remove_Job__c(JobId__c = 'dbjid:AABoqpEIEjq1'),
                 new Remove_Job__c(JobId__c = 'dbjid:other')
-        };//todo how to commit Platform events if it is possible
+        };
         insert openJobs;
 
         Test.startTest();
-        CheckJobStatusUtil.checkDeletionStatus();
+        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
+        System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
         Map<Id, Remove_Job__c> openJobsByIds = new Map<Id, Remove_Job__c>(openJobs);
@@ -52,8 +54,9 @@ private class CheckJobStatusUtilTest {
                 'please pay attention! But this files has been deleted: ' +
                 '(/file (2).txt)', removeJobs[0].Error_Message__c);
         System.assertEquals('Failed', removeJobs[0].Status__c);
-        System.assertEquals(null, removeJobs[1].Error_Message__c);
-        System.assertEquals('New', removeJobs[1].Status__c);
+        System.assertEquals('ERROR! Please pay attention to the deletion job with ' +
+                'id: dbjid:other ! Cause something wrong happens!', removeJobs[1].Error_Message__c);
+        System.assertEquals('Other', removeJobs[1].Status__c);
     }
 
     private class DropBoxConnectionTestMock implements HttpCalloutMock {

@@ -2,7 +2,7 @@
  * Created by AntonAntoniuk on 11.09.2019.
  */
 
-public with sharing class DropBoxConnectionImpl implements DropBoxConnection {//todo
+public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
 
     public String getDownloadLink(String pathToFile) {
         HttpRequest request = new HttpRequest();
@@ -68,13 +68,11 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {//
         request.setBody('{\"async_job_id\": \"' + jobId + '\"}');
         HttpResponse response = http.send(request);
 
-        new HttpLogger().logHttpUsingPlatformEvent(request, response);
-
         if (response.getStatusCode() == 200) {
             return formResultMap(response, request);
         } else {
             throw new DropBoxConnectionException(response.getBody());
-        }//todo redo to return all required values for log and body result
+        }
     }
 
     private Map<String, String> formResultMap(HttpResponse response, HttpRequest request) {

@@ -72,12 +72,39 @@ private class DropBoxConnectionTest {
         Test.startTest();
         Map<String, String> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq');
         Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq1');
-        Map<String, String> resultNull = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:other');
+        Map<String, String> resultOther = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:other');
         Test.stopTest();
 
-        System.assertEquals(null, resultFullSuccess); //todo
-        System.assertEquals(null, resultPartSuccess); //todo
-        System.assertEquals(null, resultNull);
+        System.assertEquals(
+                new Map<String, String>{
+                        'RequestBody' => '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}',
+                        'RequestHeader' => 'application/json',
+                        'ResponseBody' => '{".tag": "complete","entries": [{".tag": "success"...}]}',
+                        'ResponseHeader' => '()',
+                        'StatusCode' => '200',
+                        'Url' => 'callout:DropBoxGetFile/delete_batch/check'
+                },
+                resultFullSuccess);
+        System.assertEquals(
+                new Map<String, String>{
+                        'RequestBody' => '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}',
+                        'RequestHeader' => 'application/json',
+                        'ResponseBody' => '{".tag": "complete","entries": [{".tag": "failure"...}]}',
+                        'ResponseHeader' => '()',
+                        'StatusCode' => '200',
+                        'Url' => 'callout:DropBoxGetFile/delete_batch/check'
+                },
+                resultPartSuccess);
+        System.assertEquals(
+                new Map<String, String>{
+                        'RequestBody' => '{\"async_job_id\": \"dbjid:other\"}',
+                        'RequestHeader' => 'application/json',
+                        'ResponseBody' => '{".tag": "other","entries": {}}',
+                        'ResponseHeader' => '()',
+                        'StatusCode' => '200',
+                        'Url' => 'callout:DropBoxGetFile/delete_batch/check'
+                },
+                resultOther);
     }
 
     @IsTest
@@ -138,18 +165,10 @@ private class DropBoxConnectionTest {
             } else if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
                 if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}') {
                     response.setStatusCode(200);
-                    response.setBody('{".tag": "complete","entries": ' +
-                            '[{".tag": "success",' +
-                            '"metadata": {"path_display": "/file (1).txt"}},' +
-                            '{".tag": "success",' +
-                            '"metadata": {"path_display": "/file (3).txt"}}]}');
+                    response.setBody('{".tag": "complete","entries": [{".tag": "success"...}]}');
                 } else if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}') {
                     response.setStatusCode(200);
-                    response.setBody('{".tag": "complete","entries": ' +
-                            '[{".tag": "failure",' +
-                            '"failure": {".tag": "path_lookup","path_lookup": {".tag": "not_found"}}},' +
-                            '{".tag": "success",' +
-                            '"metadata": {"path_display": "/file (2).txt"}}]}');
+                    response.setBody('{".tag": "complete","entries": [{".tag": "failure"...}]}');
                 } else if (request.getBody() == '{\"async_job_id\": \"dbjid:other\"}') {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "other","entries": {}}');

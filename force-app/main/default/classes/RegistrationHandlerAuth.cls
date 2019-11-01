@@ -65,11 +65,3 @@ public with sharing class RegistrationHandlerAuth implements Auth.RegistrationHa
     private class RegistrationHandlerAuthException extends Exception {
     }
 }
-/*
-
-
-portalId++null
-++data++UserData%3A%5B
-attributeMap%3D%7B
-identifier%3D112533033905571486109%2C+
-provider%3DGoogle%2C+*/

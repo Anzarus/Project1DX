@@ -31,9 +31,10 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
         }
         update openJobs;
 
-        if (![SELECT Id FROM Remove_Job__c WHERE Status__c = 'New' LIMIT 1].isEmpty()) {
+        List<Remove_Job__c> newJobs = [SELECT Id FROM Remove_Job__c WHERE Status__c = 'New' LIMIT 1];
+        if (!Test.isRunningTest() && !newJobs.isEmpty()) {
             System.enqueueJob(new CheckJobStatusUtil());
-        }//todo redo to make a few record requests
+        }//todo redo to make a less record requests
     }
 
     private void analyzeRequest(Map<String, String> calloutResult, Remove_Job__c openJob) {
@@ -46,6 +47,10 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
                 if (deletionReport.get('successFiles') != new List<String>()) {
                     openJob.Error_Message__c += ' But this files has been deleted: ' + deletionReport.get('successFiles');
                 }
+            } else if (openJob.Status__c == 'Other') {
+                openJob.Error_Message__c = 'ERROR! Please pay attention to the deletion job with id: '
+                        + openJob.JobId__c + ' ! Cause something wrong happens!';
+                //todo check workflow
             }
         }
     }
@@ -64,6 +69,12 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
         if (resultMessage == 'complete') {
             List<Object> entries = (List<Object>) resultMap.get('entries');
             return formFileDeletionResult(entries);
+        } else if (resultMessage == 'other') {
+            return new Map<String, List<String>>{
+                    'result' => new List<String>{
+                            'Other'
+                    }
+            };
         }
         return null;
     }
