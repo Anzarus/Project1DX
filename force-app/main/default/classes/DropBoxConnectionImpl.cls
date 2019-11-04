@@ -76,19 +76,26 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
     }
 
     private Map<String, String> formResultMap(HttpResponse response, HttpRequest request) {
-        List<String> responseHeader = new List<String>();
-        for (String str : response.getHeaderKeys()) {
-            responseHeader.add(str);
-        }
+        return new Map<String, String>{
+                'RequestBody' => request.getBody(),
+                'RequestHeader' => JSON.serialize(getHeader(null, request)),
+                'ResponseBody' => response.getBody(),
+                'ResponseHeader' => JSON.serialize(getHeader(response, null)),
+                'StatusCode' => String.valueOf(response.getStatusCode()),
+                'Url' => request.getEndpoint()
+        };
+      }
 
-        Map<String, String> resultMap = new Map<String, String>();
-        resultMap.put('RequestBody', request.getBody());
-        resultMap.put('RequestHeader', request.getHeader('Content-Type'));
-        resultMap.put('ResponseBody', response.getBody());
-        resultMap.put('ResponseHeader', String.valueOf(responseHeader));
-        resultMap.put('StatusCode', String.valueOf(response.getStatusCode()));
-        resultMap.put('Url', request.getEndpoint());
-        return resultMap;
+    private Map<String, String> getHeader(HttpResponse response, HttpRequest request) {
+        Map<String, String> header = new Map<String, String>();
+        if (response != null) {
+            for (String key : response.getHeaderKeys()) {
+                header.put(key, response.getHeader(key));
+            }
+        } else if (request != null) {
+            header.put('Content-Type', request.getHeader('Content-Type'));
+        }
+        return header;
     }
 
     @TestVisible

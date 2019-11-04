@@ -70,37 +70,45 @@ private class DropBoxConnectionTest {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
 
         Test.startTest();
-        Map<String, String> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq');
-        Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:AABoqpEIEjq1');
-        Map<String, String> resultOther = new DropBoxConnectionImpl().checkDeletedStatus('dbjid:other');
+        Map<String, String> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('jobId:success');
+        Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('jobId:error');
+        Map<String, String> resultOther = new DropBoxConnectionImpl().checkDeletedStatus('jobId:other');
         Test.stopTest();
 
         System.assertEquals(
                 new Map<String, String>{
-                        'RequestBody' => '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}',
-                        'RequestHeader' => 'application/json',
+                        'RequestBody' => '{\"async_job_id\": \"jobId:success\"}',
+                        'RequestHeader' => JSON.serialize(new Map<String, String>{
+                                'Content-Type' => 'application/json'
+                        }),
                         'ResponseBody' => '{".tag": "complete","entries": [{".tag": "success"...}]}',
-                        'ResponseHeader' => '()',
+                        'ResponseHeader' => JSON.serialize(new Map<String, String>{
+                                'Content-Type' => 'application/json'
+                        }),
                         'StatusCode' => '200',
                         'Url' => 'callout:DropBoxGetFile/delete_batch/check'
                 },
                 resultFullSuccess);
         System.assertEquals(
                 new Map<String, String>{
-                        'RequestBody' => '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}',
-                        'RequestHeader' => 'application/json',
+                        'RequestBody' => '{\"async_job_id\": \"jobId:error\"}',
+                        'RequestHeader' => JSON.serialize(new Map<String, String>{
+                                'Content-Type' => 'application/json'
+                        }),
                         'ResponseBody' => '{".tag": "complete","entries": [{".tag": "failure"...}]}',
-                        'ResponseHeader' => '()',
+                        'ResponseHeader' => '{}',
                         'StatusCode' => '200',
                         'Url' => 'callout:DropBoxGetFile/delete_batch/check'
                 },
                 resultPartSuccess);
         System.assertEquals(
                 new Map<String, String>{
-                        'RequestBody' => '{\"async_job_id\": \"dbjid:other\"}',
-                        'RequestHeader' => 'application/json',
+                        'RequestBody' => '{\"async_job_id\": \"jobId:other\"}',
+                        'RequestHeader' => JSON.serialize(new Map<String, String>{
+                                'Content-Type' => 'application/json'
+                        }),
                         'ResponseBody' => '{".tag": "other","entries": {}}',
-                        'ResponseHeader' => '()',
+                        'ResponseHeader' => '{}',
                         'StatusCode' => '200',
                         'Url' => 'callout:DropBoxGetFile/delete_batch/check'
                 },
@@ -163,13 +171,14 @@ private class DropBoxConnectionTest {
                     response.setBody('Something went wrong!');
                 }
             } else if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
-                if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}') {
+                if (request.getBody() == '{\"async_job_id\": \"jobId:success\"}') {
                     response.setStatusCode(200);
+                    response.setHeader('Content-Type', 'application/json');
                     response.setBody('{".tag": "complete","entries": [{".tag": "success"...}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}') {
+                } else if (request.getBody() == '{\"async_job_id\": \"jobId:error\"}') {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "complete","entries": [{".tag": "failure"...}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:other\"}') {
+                } else if (request.getBody() == '{\"async_job_id\": \"jobId:other\"}') {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "other","entries": {}}');
                 } else {
