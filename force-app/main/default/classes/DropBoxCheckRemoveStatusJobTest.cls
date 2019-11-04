@@ -3,7 +3,12 @@
  */
 
 @IsTest
-private class CheckJobStatusUtilTest {
+private class DropBoxCheckRemoveStatusJobTest {
+    @TestSetup
+    static void createTestData(){
+        insert new IsEnabled__c(Name = 'CheckJobStatusQueueable', IsEnabled__c = true);
+    }
+
     @IsTest
     static void testSuccess() {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
@@ -13,11 +18,10 @@ private class CheckJobStatusUtilTest {
             openJobs.add(new Remove_Job__c(JobId__c = 'jobId:success' + i));
         }
         insert openJobs;
-        insert new IsEnabled__c(Name = 'CheckJobStatusQueueable', IsEnabled__c = true);
 
 
         Test.startTest();
-        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
+        DropBoxCheckRemoveStatusJob checkJobStatusUtil = new DropBoxCheckRemoveStatusJob();
         System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
@@ -45,7 +49,7 @@ private class CheckJobStatusUtilTest {
         insert openJobs;
 
         Test.startTest();
-        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil(openJobs, false);
+        DropBoxCheckRemoveStatusJob checkJobStatusUtil = new DropBoxCheckRemoveStatusJob(openJobs);
         System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
@@ -58,7 +62,7 @@ private class CheckJobStatusUtilTest {
 
         System.assertEquals('ERROR! Some files has not been deleted in DropBox, ' +
                 'please pay attention! But this files has been deleted: ' +
-                '(/file (2).txt)', removeJobs[0].Error_Message__c);
+                '/file (2).txt', removeJobs[0].Error_Message__c);
         System.assertEquals('Failed', removeJobs[0].Status__c);
         System.assertEquals('ERROR! Please pay attention to the deletion job with ' +
                 'id: jobId:other ! Cause something wrong happens!', removeJobs[1].Error_Message__c);

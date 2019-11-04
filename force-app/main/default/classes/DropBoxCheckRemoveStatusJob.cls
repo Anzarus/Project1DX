@@ -2,27 +2,26 @@
  * Created by AntonAntoniuk on 24.09.2019.
  */
 
-public with sharing class CheckJobStatusUtil implements Queueable, Database.AllowsCallouts {
+public with sharing class DropBoxCheckRemoveStatusJob implements Queueable, Database.AllowsCallouts {
+
+    private static String ERR_SOME_FILES_HAVE_NOT_DEL = 'ERROR! Some files has not been deleted in DropBox, please pay attention!';
+    private static String SOME_FILES_WERE_DEL = 'But this files has been deleted: {0}';
+    private static String ERR_SOMETHING_STRANGE = 'ERROR! Please pay attention to the deletion job with id: {0} ! Cause something wrong happens!';
 
     private List<Remove_Job__c> totalOpenJobs;
     private List<Remove_Job__c> currentOpenJobs;
     private Boolean recursive;
 
-    public CheckJobStatusUtil() {
+    public DropBoxCheckRemoveStatusJob() {
         this.totalOpenJobs = getOpenJobs();
         this.currentOpenJobs = getOpenJobsForCurrentQueueable();
-        this.recursive = [
-                SELECT IsEnabled__c
-                FROM IsEnabled__c
-                WHERE Name = 'CheckJobStatusQueueable'
-                LIMIT 1
-        ].IsEnabled__c;
+        this.recursive = getRecursiveSetting();
     }
 
-    public CheckJobStatusUtil(List<Remove_Job__c> openJobs, Boolean recursive) {
+    public DropBoxCheckRemoveStatusJob(List<Remove_Job__c> openJobs) {
         this.totalOpenJobs = openJobs;
         this.currentOpenJobs = getOpenJobsForCurrentQueueable();
-        this.recursive = recursive;
+        this.recursive = getRecursiveSetting();
     }
 
     private List<Remove_Job__c> getOpenJobs() {
@@ -33,6 +32,15 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
                 LIMIT 2500
         ];
         return openJobs;
+    }
+
+    private Boolean getRecursiveSetting() {
+        return [
+                SELECT IsEnabled__c
+                FROM IsEnabled__c
+                WHERE Name = 'CheckJobStatusQueueable'
+                LIMIT 1
+        ].IsEnabled__c;
     }
 
     private List<Remove_Job__c> getOpenJobsForCurrentQueueable() {
@@ -61,7 +69,7 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
         if (recursive
                 && !totalJobsWithOutCurrentJobs.isEmpty()
                 && !Test.isRunningTest()) {
-            System.enqueueJob(new CheckJobStatusUtil(totalJobsWithOutCurrentJobs, recursive));
+            System.enqueueJob(new DropBoxCheckRemoveStatusJob(totalJobsWithOutCurrentJobs));
         }
     }
 
@@ -79,13 +87,14 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
             String str = String.valueOf(deletionReport.get('result')[0]);
             openJob.Status__c = str;
             if (openJob.Status__c == 'Failed') {
-                openJob.Error_Message__c = 'ERROR! Some files has not been deleted in DropBox, please pay attention!';
+                openJob.Error_Message__c = ERR_SOME_FILES_HAVE_NOT_DEL;
                 if (deletionReport.get('successFiles') != new List<String>()) {
-                    openJob.Error_Message__c += ' But this files has been deleted: ' + deletionReport.get('successFiles');
+                    openJob.Error_Message__c += String.format(SOME_FILES_WERE_DEL, deletionReport.get('successFiles'));
                 }
             } else if (openJob.Status__c == 'Other') {
-                openJob.Error_Message__c = 'ERROR! Please pay attention to the deletion job with id: '
-                        + openJob.JobId__c + ' ! Cause something wrong happens!';
+                openJob.Error_Message__c = String.format(ERR_SOMETHING_STRANGE, new List<Object>{
+                        openJob.JobId__c
+                });
             }
         }
     }

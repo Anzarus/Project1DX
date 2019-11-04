@@ -5,7 +5,6 @@
 public with sharing class CheckJobStatus implements Schedulable {
 
     public void execute(SchedulableContext param1) {
-        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
-        System.enqueueJob(checkJobStatusUtil);
+        System.enqueueJob(new DropBoxCheckRemoveStatusJob());
     }
 }
