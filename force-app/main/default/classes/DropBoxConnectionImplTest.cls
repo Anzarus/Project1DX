@@ -3,7 +3,7 @@
  */
 
 @IsTest
-private class DropBoxConnectionTest {
+private class DropBoxConnectionImplTest {
     @IsTest
     static void getLinkSuccessTest() {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
@@ -125,21 +125,6 @@ private class DropBoxConnectionTest {
         } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
             System.assertEquals(e.getMessage(), e.getMessage());
         }
-    }
-
-    @IsTest
-    static void getLinkProxyTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
-
-        DropBoxConnectionCachedProxy connectionProxy = new DropBoxConnectionCachedProxy(new DropBoxConnectionImpl());
-        connectionProxy.cache = (CacheController) Test.createStub(CacheController.class, new MockProvider());
-
-        String firstResult = connectionProxy.getDownloadLink('/Document.docx');
-        String secondResult = connectionProxy.getDownloadLink('/Test1.1.odt');
-
-        System.assertEquals('https://dl.dropboxusercontent.com/apitl/1/Doc', firstResult);
-        System.assertEquals('https://dl.dropboxusercontent.com/apitl/1/Odt', secondResult);
-
     }
 
     private class DropBoxConnectionTestMock implements HttpCalloutMock {
