@@ -8,6 +8,8 @@ private class CheckJobStatusTest {
 
     @IsTest
     static void testSuccess() {
+        insert new IsEnabled__c(Name = 'CheckJobStatusQueueable', IsEnabled__c = true);
+
         Test.startTest();
         String jobId = System.schedule('Start schedule', CRON_EPR, new CheckJobStatus());
 

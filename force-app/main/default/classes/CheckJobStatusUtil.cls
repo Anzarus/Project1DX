@@ -6,15 +6,20 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
 
     private List<Remove_Job__c> totalOpenJobs;
     private List<Remove_Job__c> currentOpenJobs;
-    private IsEnabled__c recursive;
+    private Boolean recursive;
 
     public CheckJobStatusUtil() {
         this.totalOpenJobs = getOpenJobs();
         this.currentOpenJobs = getOpenJobsForCurrentQueueable();
-        this.recursive = IsEnabled__c.getAll().get('CheckJobStatusQueueable');
+        this.recursive = [
+                SELECT IsEnabled__c
+                FROM IsEnabled__c
+                WHERE Name = 'CheckJobStatusQueueable'
+                LIMIT 1
+        ].IsEnabled__c;
     }
 
-    public CheckJobStatusUtil(List<Remove_Job__c> openJobs, IsEnabled__c recursive) {
+    public CheckJobStatusUtil(List<Remove_Job__c> openJobs, Boolean recursive) {
         this.totalOpenJobs = openJobs;
         this.currentOpenJobs = getOpenJobsForCurrentQueueable();
         this.recursive = recursive;
@@ -51,13 +56,13 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
         }
         update currentOpenJobs;
 
-        List<Remove_Job__c> newJobs = [SELECT Id FROM Remove_Job__c WHERE Status__c = 'New' LIMIT 1];//todo
+        List<Remove_Job__c> totalJobsWithOutCurrentJobs = getTotalJobsWithoutCurrent(totalOpenJobs, currentOpenJobs);
 
-        List<Remove_Job__c> totalJobsWithOutCurrent = getTotalJobsWithOutCurrent();
-
-        if (!Test.isRunningTest() && !newJobs.isEmpty() && recursive.IsEnabled__c) {
-            System.enqueueJob(new CheckJobStatusUtil(totalJobsWithOutCurrent, recursive));
-        }//todo redo to make a less record requests
+        if (recursive
+                && !totalJobsWithOutCurrentJobs.isEmpty()
+                && !Test.isRunningTest()) {
+            System.enqueueJob(new CheckJobStatusUtil(totalJobsWithOutCurrentJobs, recursive));
+        }
     }
 
     private List<Map<String, String>> makeCallouts(DropBoxConnectionImpl dropBox) {
@@ -127,5 +132,15 @@ public with sharing class CheckJobStatusUtil implements Queueable, Database.Allo
                     'successFiles' => successDeletedFiles
             };
         }
+    }
+
+    private List<Remove_Job__c> getTotalJobsWithoutCurrent(List<Remove_Job__c> defaultJobs, List<Remove_Job__c> jobsToRemove) {
+        List<Remove_Job__c>resultList = new List<Remove_Job__c>();
+        Map<Id, Remove_Job__c> jobsToRemoveByIds = new Map<Id, Remove_Job__c>(jobsToRemove);
+        for (Remove_Job__c job : defaultJobs) {
+            if (jobsToRemoveByIds.containsKey(job.Id)) continue;
+            resultList.add(job);
+        }
+        return resultList;
     }
 }

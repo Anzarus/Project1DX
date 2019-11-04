@@ -8,24 +8,29 @@ private class CheckJobStatusUtilTest {
     static void testSuccess() {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
 
-        List<Remove_Job__c> openJobs = new List<Remove_Job__c>{
-                new Remove_Job__c(JobId__c = 'dbjid:AABoqpEIEjq')
-        };
+        List<Remove_Job__c> openJobs = new List<Remove_Job__c>();
+        for (Integer i = 0; i < 250; i++) {
+            openJobs.add(new Remove_Job__c(JobId__c = 'jobId:success' + i));
+        }
         insert openJobs;
+        insert new IsEnabled__c(Name = 'CheckJobStatusQueueable', IsEnabled__c = true);
+
 
         Test.startTest();
         CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
         System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
-        Remove_Job__c removeJob = [
+        List<Remove_Job__c> removeJobs = [
                 SELECT Error_Message__c, Status__c
                 FROM Remove_Job__c
-                WHERE Id = :openJobs[0].Id
+                WHERE Status__c = 'Success'
         ];
 
-        System.assertEquals(null, removeJob.Error_Message__c);
-        System.assertEquals('Success', removeJob.Status__c);
+        System.assertEquals(50, removeJobs.size());
+        for (Remove_Job__c removeJob : removeJobs) {
+            System.assertEquals(null, removeJob.Error_Message__c);
+        }
     }
 
     @IsTest
@@ -33,13 +38,14 @@ private class CheckJobStatusUtilTest {
         Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
 
         List<Remove_Job__c> openJobs = new List<Remove_Job__c>{
-                new Remove_Job__c(JobId__c = 'dbjid:AABoqpEIEjq1'),
-                new Remove_Job__c(JobId__c = 'dbjid:other')
+                new Remove_Job__c(JobId__c = 'jobId:error'),
+                new Remove_Job__c(JobId__c = 'jobId:other'),
+                new Remove_Job__c(JobId__c = 'jobId:inProgress')
         };
         insert openJobs;
 
         Test.startTest();
-        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil();
+        CheckJobStatusUtil checkJobStatusUtil = new CheckJobStatusUtil(openJobs, false);
         System.enqueueJob(checkJobStatusUtil);
         Test.stopTest();
 
@@ -55,8 +61,10 @@ private class CheckJobStatusUtilTest {
                 '(/file (2).txt)', removeJobs[0].Error_Message__c);
         System.assertEquals('Failed', removeJobs[0].Status__c);
         System.assertEquals('ERROR! Please pay attention to the deletion job with ' +
-                'id: dbjid:other ! Cause something wrong happens!', removeJobs[1].Error_Message__c);
+                'id: jobId:other ! Cause something wrong happens!', removeJobs[1].Error_Message__c);
         System.assertEquals('Other', removeJobs[1].Status__c);
+        System.assertEquals(null, removeJobs[2].Error_Message__c);
+        System.assertEquals('New', removeJobs[2].Status__c);
     }
 
     private class DropBoxConnectionTestMock implements HttpCalloutMock {
@@ -64,23 +72,27 @@ private class CheckJobStatusUtilTest {
         public HttpResponse respond(HttpRequest request) {
             HttpResponse response = new HttpResponse();
             if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
-                if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq\"}') {
+                if (request.getBody().startsWith('{\"async_job_id\": \"jobId:success')
+                        && request.getBody().endsWith('\"}')) {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "complete","entries": ' +
                             '[{".tag": "success",' +
                             '"metadata": {"path_display": "/file (1).txt"}},' +
                             '{".tag": "success",' +
                             '"metadata": {"path_display": "/file (3).txt"}}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:AABoqpEIEjq1\"}') {
+                } else if (request.getBody() == '{\"async_job_id\": \"jobId:error\"}') {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "complete","entries": ' +
                             '[{".tag": "failure",' +
                             '"failure": {".tag": "path_lookup","path_lookup": {".tag": "not_found"}}},' +
                             '{".tag": "success",' +
                             '"metadata": {"path_display": "/file (2).txt"}}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"dbjid:other\"}') {
+                } else if (request.getBody() == '{\"async_job_id\": \"jobId:other\"}') {
                     response.setStatusCode(200);
                     response.setBody('{".tag": "other","entries": {}}');
+                } else if (request.getBody() == '{\"async_job_id\": \"jobId:inProgress\"}') {
+                    response.setStatusCode(200);
+                    response.setBody('{".tag": "inProgress","entries": {}}');
                 } else {
                     response.setStatusCode(409);
                     response.setBody('Something went wrong!');
