@@ -4,7 +4,7 @@
 
 public with sharing class DropBoxCheckRemoveStatusJob implements Queueable, Database.AllowsCallouts {
 
-    private static String ERR_SOME_FILES_HAVE_NOT_DEL = 'ERROR! Some files has not been deleted in DropBox, please pay attention!';
+    private static String ERR_SOME_FILES_HAVE_NOT_DEL = 'ERROR! Some files has not been deleted in DropBox, please pay attention! ';
     private static String SOME_FILES_WERE_DEL = 'But this files has been deleted: {0}';
     private static String ERR_SOMETHING_STRANGE = 'ERROR! Please pay attention to the deletion job with id: {0} ! Cause something wrong happens!';
 
