@@ -14,12 +14,15 @@ public with sharing class DropBoxCheckRemoveStatusJob implements Queueable, Data
 
     public DropBoxCheckRemoveStatusJob() {
         this.totalOpenJobs = getOpenJobs();
-        this.currentOpenJobs = getOpenJobsForCurrentQueueable();
-        this.recursive = getRecursiveSetting();
+        setCurrentJobsAndRecursive();
     }
 
     public DropBoxCheckRemoveStatusJob(List<Remove_Job__c> openJobs) {
         this.totalOpenJobs = openJobs;
+        setCurrentJobsAndRecursive();
+    }
+
+    private void setCurrentJobsAndRecursive() {
         this.currentOpenJobs = getOpenJobsForCurrentQueueable();
         this.recursive = getRecursiveSetting();
     }
