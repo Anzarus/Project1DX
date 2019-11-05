@@ -61,7 +61,7 @@ private class ItemManagementComponentControllerTest {
                 WHERE Name = 'Test Pricebook'
         ];
 
-        List<Product2> product2s =  ItemManagementComponentController.getItems(pricebook2.Id);
+        List<Product2> product2s =  ItemManagementComponentController.getProductsByPriceBookEntryId(pricebook2.Id);
         System.assertEquals(10, product2s.size());
     }
 }

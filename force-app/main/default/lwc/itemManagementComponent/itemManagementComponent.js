@@ -3,7 +3,7 @@
  */
 
 import {LightningElement, wire, track, api} from 'lwc';
-import getItems from '@salesforce/apex/ItemManagementComponentController.getItems';
+import getItems from '@salesforce/apex/ItemManagementComponentController.getProductsByPriceBookEntryId';
 
 export default class ItemManagementComponent extends LightningElement {
 

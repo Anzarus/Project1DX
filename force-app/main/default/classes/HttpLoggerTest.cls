@@ -20,8 +20,8 @@ private class HttpLoggerTest {
         Test.startTest();
         HttpLogger httpLogger = new HttpLogger();
 
-        String requestHeader = JSON.serialize(httpLogger.getHeader(null, request));
-        String responseHeader = JSON.serialize(httpLogger.getHeader(response, null));
+        String requestHeader = JSON.serialize(httpLogger.getRequestHeader(request));
+        String responseHeader = JSON.serialize(httpLogger.getResponseHeader(response));
 
         httpLogger.logHttpUsingPlatformEvent(
                 new Map<String, String>{

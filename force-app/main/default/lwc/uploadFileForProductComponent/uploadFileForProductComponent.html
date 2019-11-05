@@ -1,0 +1,25 @@
+<!--
+ - Created by AntonAntoniuk on 05.11.2019.
+ -->
+
+<!-- Upload File For Product Component -->
+<template>
+    <div class="">
+        <lightning-radio-group label="Upload Variant"
+                               options={options}
+                               variant="label-inline"
+                               type="Button"
+                               onchange={}>
+        </lightning-radio-group>
+        <template if:true={isUploadFromLocal}>
+            <lightning-file-upload label="File For Product"
+                                   name="fileUploader"
+                                   record-id={userRecordId}
+                                   onuploadfinished={handleUploadFinished}>
+            </lightning-file-upload>
+        </template>
+        <template if:false={isUploadFromLocal}>
+            kjhgfds
+        </template>
+    </div>
+</template>
