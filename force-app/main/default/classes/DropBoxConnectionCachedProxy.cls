@@ -19,4 +19,8 @@ public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnect
         }
         return cache.getCache(key);
     }
+
+    public String uploadFile(String filePath, String fileContent) {
+        return dropBoxConnector.uploadFile(filePath, fileContent);//todo ask about this
+    }
 }
