@@ -4,7 +4,7 @@
 
 public interface DropBoxConnection {
 
-    String getDownloadLink(String pathToFile);
+    String getDownloadLink(String fileId);
 
-    String uploadFile(String filePath, String fileContent);
+    String uploadFile(String fileId, String fileContent);
 }

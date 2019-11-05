@@ -13,8 +13,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
                     '\"mute\": {3},' +
                     '\"strict_conflict\": {4}';
 
-
-    public String getDownloadLink(String pathToFile) {
+    public String getDownloadLink(String fileId) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
         String result;
@@ -24,7 +23,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         }));
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json');
-        request.setBody('{\"path\": \"' + pathToFile + '\"}');
+        request.setBody('{\"path\": \"' + fileId + '\"}');
         HttpResponse response = http.send(request);
 
         new HttpLogger().logHttpUsingPlatformEvent(request, response);
@@ -40,7 +39,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         return result;
     }
 
-    public String deleteFiles(List<String> pathToFiles) {
+    public String deleteFiles(List<String> filesIds) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
 
@@ -49,7 +48,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         }));
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json');
-        request.setBody('{\"entries\": [' + createDelRequestBodyData(pathToFiles) + ']}');
+        request.setBody('{\"entries\": [' + createDelRequestBodyData(filesIds) + ']}');
         HttpResponse response = http.send(request);
 
         new HttpLogger().logHttpUsingPlatformEvent(request, response);
@@ -62,11 +61,11 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         }
     }
 
-    private String createDelRequestBodyData(List<String> pathToFiles) {
+    private String createDelRequestBodyData(List<String> filesIds) {
         String bodyData = '';
-        for (Integer i = 0; i < pathToFiles.size(); i++) {
-            bodyData += '{\"path\": \"' + pathToFiles[i] + '\"}';
-            if (i + 1 == pathToFiles.size()) continue;
+        for (Integer i = 0; i < filesIds.size(); i++) {
+            bodyData += '{\"path\": \"' + filesIds[i] + '\"}';
+            if (i + 1 == filesIds.size()) continue;
             bodyData += ', ';
         }
         return bodyData;
@@ -140,9 +139,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         HttpResponse response = http.send(request);
 
         if (response.getStatusCode() == 200) {
-            Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
-            String resultPath = String.valueOf(result.get('path_display'));
-            return resultPath;
+            return response.getBody();
         }
         throw new DropBoxConnectionException(response.getBody());
     }
