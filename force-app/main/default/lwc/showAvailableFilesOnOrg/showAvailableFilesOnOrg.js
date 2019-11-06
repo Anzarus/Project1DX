@@ -8,13 +8,10 @@ export default class ShowAvailableFilesOnOrg extends LightningElement {
 
     @api filesForCurrentUser;
 
-    handleFileUploadClick(event) {
-        console.log(event);
-        console.log(event.target.parentElement.dataset.item);
-        const file_evt = new CustomEvent(
-            'file_event', {detail: event.detail}
+    handleUploadClick(file_event) {
+        const list_of_files_evt = new CustomEvent(
+            'list_of_files_evt', {detail: file_event.detail}
         );
-
-        this.dispatchEvent(file_evt);
+        this.dispatchEvent(list_of_files_evt);
     }
 }

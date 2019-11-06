@@ -7,14 +7,35 @@ public with sharing class UploadFileForProductController {
     @AuraEnabled(Cacheable=true)
     public static List<ContentDocument> getPersonalFilesForCurrentUser(Id currentUserId) {
         return [
-                SELECT Title, FileExtension
+                SELECT Id, Title, FileExtension
                 FROM ContentDocument
                 WHERE OwnerId = :currentUserId
         ];
     }
 
     @AuraEnabled
-    public static void sendFileToDropBox(Id fileId) {
-System.debug(fileId);
+    public static void sendFileToDropBox(String fileId, String productId, Boolean cacheToOrg) {
+        System.debug(fileId);
+
+        ContentVersion file = [
+                SELECT VersionData, Title, FileExtension
+                FROM ContentVersion
+                WHERE ContentDocumentId = :fileId AND IsLatest = TRUE
+        ];
+
+        System.debug(file);
+
+        DropBoxConnection dropBox = new DropBoxConnectionImpl();
+        DropBoxConnectionUploadable dropBoxUploadable = new DropBoxConnectionUploadableImpl(dropBox);
+
+        String resultPath = dropBoxUploadable.uploadFile(
+                '/' + file.Title + '.' + file.FileExtension, file.VersionData
+        );
+
+        update new Product2(Id = productId, File_Id__c = resultPath);
+
+        if (!cacheToOrg) {
+            delete new ContentDocument(Id = fileId);
+        }
     }
 }

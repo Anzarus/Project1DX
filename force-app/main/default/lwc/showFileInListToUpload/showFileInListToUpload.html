@@ -1,0 +1,17 @@
+<!--
+ - Created by AntonAntoniuk on 06.11.2019.
+ -->
+
+<!-- Show File In List To Upload -->
+<template>
+    <div class="slds-grid slds-box custom-box-normal slds-box_border">
+        <div class="slds-col_bump-right">
+            {file.Title}.{file.FileExtension}
+        </div>
+        <lightning-button
+                label="Upload"
+                variant="brand"
+                onclick={handleFileUploadClick}>
+        </lightning-button>
+    </div>
+</template>

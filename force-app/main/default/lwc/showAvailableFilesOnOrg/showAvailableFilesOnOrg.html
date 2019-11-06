@@ -5,16 +5,7 @@
 <!-- Show Available Files On Org -->
 <template>
     <template for:each={filesForCurrentUser} for:item="item">
-        <div class="slds-grid slds-box custom-box-normal slds-box_border"
-             key={item} data-item={item}>
-            <div class="slds-col_bump-right">
-                {item.Title}.{item.FileExtension}
-            </div>
-                <lightning-button
-                        label="Upload"
-                        variant="brand"
-                        onclick={handleFileUploadClick}>
-                </lightning-button>
-        </div>
+        <c-show-file-in-list-to-upload file={item} key={item.Id} onfile_event={handleUploadClick}>
+        </c-show-file-in-list-to-upload>
     </template>
 </template>

@@ -119,7 +119,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
         return header;
     }
 
-    public String uploadFile(String filePath, String fileContent) {
+    public String uploadFile(String filePath, Blob fileContent) {
         HttpRequest request = new HttpRequest();
         Http http = new Http();
 
@@ -134,7 +134,7 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
                         })
                         + '}');
         request.setHeader('Content-Type', 'application/octet-stream');
-        request.setBody(fileContent);
+        request.setBodyAsBlob(fileContent);
 
         HttpResponse response = http.send(request);
 

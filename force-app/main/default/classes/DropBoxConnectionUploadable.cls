@@ -4,5 +4,5 @@
 
 public interface DropBoxConnectionUploadable extends DropBoxConnection{
 
-    String uploadFile(String fileId, String fileContent);
+    String uploadFile(String fileId, Blob fileContent);
 }
