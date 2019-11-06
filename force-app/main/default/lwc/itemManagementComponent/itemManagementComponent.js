@@ -18,7 +18,7 @@ export default class ItemManagementComponent extends LightningElement {
     @track currentPage = 1;
     @track currentItem;
 
-    @wire(getItems, {recordId: '$recordId'}) wiredItems({error, data}) {//todo wrong послідовність
+    @wire(getItems, {recordId: '$recordId'}) wiredItems({error, data}) {
         if (data) {
             this.items = data;
             this.error = undefined;

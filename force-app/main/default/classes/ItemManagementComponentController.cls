@@ -13,8 +13,8 @@ public with sharing class ItemManagementComponentController {
                         SELECT Product2Id
                         FROM PricebookEntry
                         WHERE Pricebook2Id = :Id.valueOf(recordId)
-                        ORDER BY Name ASC
                 )
+                ORDER BY Name ASC
         ];
     }
 }

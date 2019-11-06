@@ -4,22 +4,32 @@
 
 <!-- Upload File For Product Component -->
 <template>
-    <div class="">
-        <lightning-radio-group label="Upload Variant"
-                               options={options}
-                               variant="label-inline"
-                               type="Button"
-                               onchange={}>
-        </lightning-radio-group>
+    <div class="slds-card">
+        <div class="slds-border--bottom">
+            <lightning-radio-group label="Upload Variant"
+                                   options={options}
+                                   variant="label-inline"
+                                   value={uploadVariant}
+                                   type="Button"
+                                   onchange={changeVariant}>
+            </lightning-radio-group>
+        </div>
+
         <template if:true={isUploadFromLocal}>
+            <div class="slds-grid slds-grid--align-center">
             <lightning-file-upload label="File For Product"
-                                   name="fileUploader"
-                                   record-id={userRecordId}
-                                   onuploadfinished={handleUploadFinished}>
-            </lightning-file-upload>
+                                       name="fileUploader"
+                                       record-id={currentUserId}
+                                       onuploadfinished={handleUploadFinished}>
+                </lightning-file-upload>
+            </div>
         </template>
         <template if:false={isUploadFromLocal}>
-            kjhgfds
+            <div class="custom-class-style-fill-block">
+            <c-show-available-files-on-org files-for-current-user={currentUserFiles}
+                                           onfile_event={handleFileEvent}>
+            </c-show-available-files-on-org>
+            </div>
         </template>
     </div>
 </template>
