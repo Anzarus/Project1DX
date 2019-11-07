@@ -19,13 +19,9 @@ public with sharing class DropBoxConnectionUploadableImpl implements DropBoxConn
         return getFileId(responseBody);
     }
 
-    public String getFileId(String responseBody){
+    private String getFileId(String responseBody){
         Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
         String resultPath = String.valueOf(result.get('path_display'));
         return resultPath;
-    }
-
-    public String uploadFile(String fileId, String fileContent) {
-        return '';
     }
 }

@@ -4,6 +4,9 @@
 
 public with sharing class UploadFileForProductController {
 
+    @TestVisible
+    private static DropBoxConnectionUploadable dropBoxUploadable = new DropBoxConnectionUploadableImpl(new DropBoxConnectionImpl());
+
     @AuraEnabled(Cacheable=true)
     public static List<ContentDocument> getPersonalFilesForCurrentUser(Id currentUserId) {
         return [
@@ -15,13 +18,6 @@ public with sharing class UploadFileForProductController {
 
     @AuraEnabled
     public static void sendFileToDropBox(String fileId, Blob content, String productId) {
-        System.debug(fileId);
-        System.debug(content);
-        System.debug(productId);
-
-        DropBoxConnection dropBox = new DropBoxConnectionImpl();
-        DropBoxConnectionUploadable dropBoxUploadable = new DropBoxConnectionUploadableImpl(dropBox);
-
         String resultPath = dropBoxUploadable.uploadFile(
                 '/' + fileId, content
         );
@@ -31,18 +27,14 @@ public with sharing class UploadFileForProductController {
 
     @AuraEnabled
     public static void sendFileToDropBoxViaOrg(String fileId, String productId, Boolean cacheToOrg) {
-        System.debug(fileId);
-
         ContentVersion file = [
                 SELECT VersionData, Title, FileExtension
                 FROM ContentVersion
                 WHERE ContentDocumentId = :fileId AND IsLatest = TRUE
         ];
 
-        System.debug(file);
+        System.debug(EncodingUtil.base64Encode(file.VersionData));
 
-        DropBoxConnection dropBox = new DropBoxConnectionImpl();
-        DropBoxConnectionUploadable dropBoxUploadable = new DropBoxConnectionUploadableImpl(dropBox);
 
         String resultPath = dropBoxUploadable.uploadFile(
                 '/' + file.Title + '.' + file.FileExtension, file.VersionData

@@ -27,6 +27,23 @@ public class MockProvider implements System.StubProvider {
                 return 'https://dl.dropboxusercontent.com/apitl/1/Odt';
             }
             return null;
+        } else if (stubbedMethodName == 'getDownloadLink') {
+            if (listOfArgs[0] == '/Document.docx') {
+                return 'https://dl.dropboxusercontent.com/apitl/1/Doc';
+            } else if (listOfArgs[0] == '/Test1.1.odt') {
+                return 'https://dl.dropboxusercontent.com/apitl/1/Odt';
+            }
+            return null;
+        } else if (stubbedMethodName == 'uploadFile') {
+            if (listOfArgs[0].equals('/Document.docx') &&
+                    EncodingUtil.base64Encode((Blob) listOfArgs[1]).equals(EncodingUtil.base64Encode(Blob.valueOf('content')))) {
+                return '{' +
+                        '"name": "Document.docx",' +
+                        '"size": 7212,' +
+                        '"path_display": "/Document.docx"' +
+                        '}';
+            }
+            return null;
         } else {
             return null;
         }

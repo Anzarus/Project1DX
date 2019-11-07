@@ -6,7 +6,11 @@
 private class DropBoxConnectionImplTest {
     @IsTest
     static void getLinkSuccessTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody('{"metadata": {}, "link": "https://dl.dropboxusercontent.com/apitl/1/Doc"}');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
 
         Test.startTest();
         String link = new DropBoxConnectionImpl().getDownloadLink('/Document.docx');
@@ -17,43 +21,63 @@ private class DropBoxConnectionImplTest {
 
     @IsTest
     static void getLinkErrorTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(404);
+        response.setBody('Something went wrong!');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
         try {
             Test.startTest();
             new DropBoxConnectionImpl().getDownloadLink('Documentdocx');
             Test.stopTest();
         } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+            System.assertEquals('File not found!', e.getMessage());
         }
     }
 
     @IsTest
     static void getLinkErrorNotFoundTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(409);
+        response.setBody('Something went wrong!');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
         try {
             Test.startTest();
             new DropBoxConnectionImpl().getDownloadLink('/');
             Test.stopTest();
         } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+            System.assertEquals('Something went wrong!', e.getMessage());
         }
     }
 
     @IsTest
     static void deleteSuccessTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody('{".tag": "async_job_id", "async_job_id": "dbjid:AABoqpEIEjq"}');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
 
         Test.startTest();
-        String link = new DropBoxConnectionImpl().deleteFiles(new List<String>{
+        String jobId = new DropBoxConnectionImpl().deleteFiles(new List<String>{
                 '/file (2).txt', '/file (1).txt', '/file (1) (1).txt'
         });
         Test.stopTest();
 
-        System.assertEquals('dbjid:AABoqpEIEjq', link);
+        System.assertEquals('dbjid:AABoqpEIEjq', jobId);
     }
+
     @IsTest
     static void deleteErrorTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(409);
+        response.setBody('Something went wrong!');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
         try {
             Test.startTest();
             new DropBoxConnectionImpl().deleteFiles(new List<String>{
@@ -61,18 +85,21 @@ private class DropBoxConnectionImplTest {
             });
             Test.stopTest();
         } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+            System.assertEquals('Something went wrong!', e.getMessage());
         }
     }
 
     @IsTest
-    static void deleteCheckCompleteTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+    static void deleteCheckCompleteSuccessTest() {
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setHeader('Content-Type', 'application/json');
+        response.setBody('{".tag": "complete","entries": [{".tag": "success"...}]}');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
 
         Test.startTest();
         Map<String, String> resultFullSuccess = new DropBoxConnectionImpl().checkDeletedStatus('jobId:success');
-        Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('jobId:error');
-        Map<String, String> resultOther = new DropBoxConnectionImpl().checkDeletedStatus('jobId:other');
         Test.stopTest();
 
         System.assertEquals(
@@ -89,6 +116,20 @@ private class DropBoxConnectionImplTest {
                         'Url' => 'callout:DropBoxGetFile/delete_batch/check'
                 },
                 resultFullSuccess);
+    }
+
+    @IsTest
+    static void deleteCheckCompleteFailureTest() {
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody('{".tag": "complete","entries": [{".tag": "failure"...}]}');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
+        Test.startTest();
+        Map<String, String> resultPartSuccess = new DropBoxConnectionImpl().checkDeletedStatus('jobId:error');
+        Test.stopTest();
+
         System.assertEquals(
                 new Map<String, String>{
                         'RequestBody' => '{\"async_job_id\": \"jobId:error\"}',
@@ -101,6 +142,20 @@ private class DropBoxConnectionImplTest {
                         'Url' => 'callout:DropBoxGetFile/delete_batch/check'
                 },
                 resultPartSuccess);
+    }
+
+    @IsTest
+    static void deleteCheckOtherTest() {
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody('{".tag": "other","entries": {}}');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
+        Test.startTest();
+        Map<String, String> resultOther = new DropBoxConnectionImpl().checkDeletedStatus('jobId:other');
+        Test.stopTest();
+
         System.assertEquals(
                 new Map<String, String>{
                         'RequestBody' => '{\"async_job_id\": \"jobId:other\"}',
@@ -117,61 +172,75 @@ private class DropBoxConnectionImplTest {
 
     @IsTest
     static void deleteCheckErrorTest() {
-        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock());
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(409);
+        response.setBody('Something went wrong!');
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
         try {
             Test.startTest();
             new DropBoxConnectionImpl().checkDeletedStatus('');
             Test.stopTest();
         } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
-            System.assertEquals(e.getMessage(), e.getMessage());
+            System.assertEquals('Something went wrong!', e.getMessage());
+        }
+    }
+
+    @IsTest
+    static void uploadFileSuccessTest() {
+        String responseBody = '{' +
+                '"name": "Document.docx",' +
+                '"size": 7212,' +
+                '"path_display": "/Document.docx"' +
+                '}';
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(200);
+        response.setBody(responseBody);
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
+        Test.startTest();
+        String result = new DropBoxConnectionImpl().uploadFile(
+                '/Document.docx',
+                Blob.valueOf('content')
+        );
+        Test.stopTest();
+
+        System.assertEquals(responseBody, result);
+    }
+
+    @IsTest
+    static void uploadFileErrorTest() {
+        String responseBody = 'Something went wrong!';
+        HttpResponse response = new HttpResponse();
+        response.setStatusCode(400);
+        response.setBody(responseBody);
+
+        Test.setMock(HttpCalloutMock.class, new DropBoxConnectionTestMock(response));
+
+        try {
+            Test.startTest();
+            new DropBoxConnectionImpl().uploadFile(
+                    '.',
+                    Blob.valueOf('content')
+            );
+            Test.stopTest();
+        } catch (DropBoxConnectionImpl.DropBoxConnectionException e) {
+            System.assertEquals('Something went wrong!', e.getMessage());
         }
     }
 
     private class DropBoxConnectionTestMock implements HttpCalloutMock {
 
+        HttpResponse httpResponse;
+
+        private DropBoxConnectionTestMock(HttpResponse httpResponse) {
+            this.httpResponse = httpResponse;
+        }
+
         public HttpResponse respond(HttpRequest request) {
-            HttpResponse response = new HttpResponse();
-            if (request.getEndpoint() == 'callout:DropBoxGetFile/get_temporary_link') {
-                if (request.getBody() == '{\"path\": \"/Document.docx\"}') {
-                    response.setStatusCode(200);
-                    response.setBody('{"metadata": {}, "link": "https://dl.dropboxusercontent.com/apitl/1/Doc"}');
-                } else if (request.getBody() == '{\"path\": \"/Test1.1.odt\"}') {
-                    response.setStatusCode(200);
-                    response.setBody('{"metadata": {}, "link": "https://dl.dropboxusercontent.com/apitl/1/Odt"}');
-                } else if (request.getBody() == '{\"path\": \"/\"}') {
-                    response.setStatusCode(404);
-                    response.setBody('Something went wrong!');
-                } else {
-                    response.setStatusCode(409);
-                    response.setBody('Something went wrong!');
-                }
-            } else if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch') {
-                if (request.getBody() == '{\"entries\": [{\"path\": \"/file (2).txt\"}, ' +
-                        '{\"path\": \"/file (1).txt\"}, ' +
-                        '{\"path\": \"/file (1) (1).txt\"}]}') {
-                    response.setStatusCode(200);
-                    response.setBody('{".tag": "async_job_id", "async_job_id": "dbjid:AABoqpEIEjq"}');
-                } else {
-                    response.setStatusCode(409);
-                    response.setBody('Something went wrong!');
-                }
-            } else if (request.getEndpoint() == 'callout:DropBoxGetFile/delete_batch/check') {
-                if (request.getBody() == '{\"async_job_id\": \"jobId:success\"}') {
-                    response.setStatusCode(200);
-                    response.setHeader('Content-Type', 'application/json');
-                    response.setBody('{".tag": "complete","entries": [{".tag": "success"...}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"jobId:error\"}') {
-                    response.setStatusCode(200);
-                    response.setBody('{".tag": "complete","entries": [{".tag": "failure"...}]}');
-                } else if (request.getBody() == '{\"async_job_id\": \"jobId:other\"}') {
-                    response.setStatusCode(200);
-                    response.setBody('{".tag": "other","entries": {}}');
-                } else {
-                    response.setStatusCode(409);
-                    response.setBody('Something went wrong!');
-                }
-            }
-            return response;
+            return this.httpResponse;
         }
 
     }
