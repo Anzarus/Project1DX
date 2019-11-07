@@ -14,7 +14,23 @@ public with sharing class UploadFileForProductController {
     }
 
     @AuraEnabled
-    public static void sendFileToDropBox(String fileId, String productId, Boolean cacheToOrg) {
+    public static void sendFileToDropBox(String fileId, Blob content, String productId) {
+        System.debug(fileId);
+        System.debug(content);
+        System.debug(productId);
+
+        DropBoxConnection dropBox = new DropBoxConnectionImpl();
+        DropBoxConnectionUploadable dropBoxUploadable = new DropBoxConnectionUploadableImpl(dropBox);
+
+        String resultPath = dropBoxUploadable.uploadFile(
+                '/' + fileId, content
+        );
+
+        update new Product2(Id = productId, File_Id__c = resultPath);
+    }
+
+    @AuraEnabled
+    public static void sendFileToDropBoxViaOrg(String fileId, String productId, Boolean cacheToOrg) {
         System.debug(fileId);
 
         ContentVersion file = [

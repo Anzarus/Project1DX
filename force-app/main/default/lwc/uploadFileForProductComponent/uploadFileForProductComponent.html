@@ -6,35 +6,48 @@
 <template>
     <div class="slds-card">
         <div class="slds-border--bottom">
-            <lightning-radio-group label="Upload Variant"
-                                   options={options}
-                                   variant="label-inline"
-                                   value={uploadVariant}
-                                   type="Button"
-                                   onchange={changeVariant}>
-            </lightning-radio-group>
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center">
+                <lightning-radio-group label="Upload Variant"
+                                       options={options}
+                                       variant="label-hidden"
+                                       value={uploadVariant}
+                                       type="Button"
+                                       onchange={changeVariant}>
+                </lightning-radio-group>
+            </div>
         </div>
-
         <template if:true={isUploadFromLocal}>
-            <div class="slds-grid slds-grid--align-center slds-grid_vertical">
-                <div class="slds-col">
-                    <lightning-file-upload label="File For Product"
-                                           name="fileUploader"
-                                           record-id={currentUserId}
-                                           onuploadfinished={handleUploadFinished}>
-                    </lightning-file-upload>
-                </div>
-                <div class="slds-col">
-                    <lightning-input label="Save to org also"
-                                     type="checkbox"
-                                     variant="label-inline"
-                                     value={cacheToOrg}
-                                     onchange={handleCacheCheckBox}>
-                    </lightning-input>
+            <div class="slds-grid slds-grid_align-center">
+                <lightning-input label="File For Product"
+                                 type="file"
+                                 variant="label-hidden"
+                                 value={cacheToOrg}
+                                 onchange={handleUploadFile}>
+                </lightning-input>
+            </div>
+        </template>
+        <template if:true={isUploadFromLocalThroughOrg}>
+            <div class="slds-grid slds-grid_align-center">
+                <div class="slds-grid_vertical">
+                    <div class="slds-col">
+                        <lightning-file-upload label=""
+                                               name="fileUploader"
+                                               record-id={currentUserId}
+                                               onuploadfinished={handleUploadFinished}>
+                        </lightning-file-upload>
+                    </div>
+                    <div class="slds-col">
+                        <lightning-input label="Save to org also"
+                                         type="checkbox"
+                                         variant="label-inline"
+                                         value={cacheToOrg}
+                                         onchange={handleCacheCheckBox}>
+                        </lightning-input>
+                    </div>
                 </div>
             </div>
         </template>
-        <template if:false={isUploadFromLocal}>
+        <template if:true={isUploadFromOrg}>
             <div class="custom-class-style-fill-block">
                 <c-show-available-files-on-org files-for-current-user={currentUserFiles}
                                                onlist_of_files_evt={handleFileEvent}>
