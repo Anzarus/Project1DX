@@ -6,5 +6,5 @@ public interface DropBoxConnection {
 
     String getDownloadLink(String fileId);
 
-    String uploadFile(String fileId, Blob fileContent);//todo ask about this method cause of creation in new interface
+    String uploadFile(String fileId, Blob fileContent);
 }
