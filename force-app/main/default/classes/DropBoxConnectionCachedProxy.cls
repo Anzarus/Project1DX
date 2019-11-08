@@ -14,7 +14,7 @@ public with sharing class DropBoxConnectionCachedProxy implements DropBoxConnect
 
     public String getDownloadLink(String fileId) {
         String key = String.valueOf(fileId.hashCode());
-        if (!cache.hasCache(key)) {
+        if(!cache.hasCache(key)) {
             cache.putCache(key, dropBoxConnector.getDownloadLink(fileId));
         }
         return cache.getCache(key);
