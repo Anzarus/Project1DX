@@ -48,9 +48,5 @@ public class Product2FileFromDropBoxControllerTest {
                 return '';
             }
         }
-
-        public String uploadFile(String fileId, Blob fileContent) {
-            return '';
-        }
     }
 }

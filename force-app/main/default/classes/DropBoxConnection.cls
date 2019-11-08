@@ -5,6 +5,4 @@
 public interface DropBoxConnection {
 
     String getDownloadLink(String fileId);
-
-    String uploadFile(String fileId, Blob fileContent);
 }

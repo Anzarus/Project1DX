@@ -5,13 +5,6 @@
 public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
 
     private String getFileEndpoint = 'callout:DropBoxGetFile{0}';
-    private String uploadFileEndpoint = 'callout:DropBoxUploadFile{0}';
-    private String uploadParams =
-            '\"path\": \"{0}\",' +
-                    '\"mode\": \"{1}\",' +
-                    '\"autorename\": {2},' +
-                    '\"mute\": {3},' +
-                    '\"strict_conflict\": {4}';
 
     public String getDownloadLink(String fileId) {
         HttpRequest request = new HttpRequest();
@@ -117,31 +110,6 @@ public with sharing class DropBoxConnectionImpl implements DropBoxConnection {
             header.put('Content-Type', request.getHeader('Content-Type'));
         }
         return header;
-    }
-
-    public String uploadFile(String filePath, Blob fileContent) {
-        HttpRequest request = new HttpRequest();
-        Http http = new Http();
-
-        request.setEndpoint(String.format(uploadFileEndpoint, new List<Object>{
-                '/upload'
-        }));
-        request.setMethod('POST');
-        request.setHeader('Dropbox-API-Arg',
-                '{' +
-                        String.format(uploadParams, new List<Object>{
-                                filePath, 'add', true, false, false
-                        })
-                        + '}');
-        request.setHeader('Content-Type', 'application/octet-stream');
-        request.setBodyAsBlob(fileContent);
-
-        HttpResponse response = http.send(request);
-
-        if (response.getStatusCode() == 200) {
-            return response.getBody();
-        }
-        throw new DropBoxConnectionException(response.getBody());
     }
 
     @TestVisible

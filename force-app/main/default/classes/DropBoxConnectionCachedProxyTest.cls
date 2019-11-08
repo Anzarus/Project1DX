@@ -25,21 +25,4 @@ private class DropBoxConnectionCachedProxyTest {
 
         System.assertEquals('https://dl.dropboxusercontent.com/apitl/1/Odt', result);
     }
-
-    @IsTest
-    static void uploadFileSuccessTest() {
-        DropBoxConnection connection = (DropBoxConnectionImpl) Test.createStub(DropBoxConnectionImpl.class, new MockProvider());
-        DropBoxConnectionCachedProxy connectionProxy = new DropBoxConnectionCachedProxy(connection);
-
-        String result = connectionProxy.uploadFile(
-                '/Document.docx',
-                Blob.valueOf('content')
-        );
-
-        System.assertEquals('{' +
-                '"name": "Document.docx",' +
-                '"size": 7212,' +
-                '"path_display": "/Document.docx"' +
-                '}', result);
-    }
 }

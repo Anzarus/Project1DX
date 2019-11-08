@@ -30,9 +30,9 @@ private class UploadFileForProductControllerTest {
         Product2 product = new Product2(Name = 'TestProduct', Price__c = 1);
         insert product;
 
-        DropBoxConnectionImpl connection =
-                (DropBoxConnectionImpl) Test.createStub(DropBoxConnectionImpl.class, new MockProvider());
-        UploadFileForProductController.dropBoxUploadable = new DropBoxConnectionUploadableImpl(connection);
+        DropBoxConnectionUploadable connectionUploadable =
+                (DropBoxConnectionUploadable) Test.createStub(DropBoxConnectionUploadable.class, new MockProvider());
+        UploadFileForProductController.dropBoxUploadable = connectionUploadable;
 
         UploadFileForProductController.sendFileToDropBox('Document.docx', Blob.valueOf('content'), product.Id);
 
@@ -44,9 +44,9 @@ private class UploadFileForProductControllerTest {
         Product2 product = new Product2(Name = 'TestProduct', Price__c = 1);
         insert product;
 
-        DropBoxConnectionImpl connection =
-                (DropBoxConnectionImpl) Test.createStub(DropBoxConnectionImpl.class, new MockProvider());
-        UploadFileForProductController.dropBoxUploadable = new DropBoxConnectionUploadableImpl(connection);
+        DropBoxConnectionUploadable connectionUploadable =
+                (DropBoxConnectionUploadable) Test.createStub(DropBoxConnectionUploadable.class, new MockProvider());
+        UploadFileForProductController.dropBoxUploadable = connectionUploadable;
 
         Test.startTest();
         List<ContentDocument> documents;
@@ -66,12 +66,7 @@ private class UploadFileForProductControllerTest {
                     FROM ContentDocument
                     WHERE LatestPublishedVersionId = :content.Id
             ];
-            System.debug(content.VersionData);
-            System.debug(EncodingUtil.base64Encode(content.VersionData));
-            System.debug(EncodingUtil.base64Encode(Blob.valueOf('content')));
-
         }
-
 
         UploadFileForProductController.sendFileToDropBoxViaOrg(documents[0].Id, product.Id, false);
         Test.stopTest();

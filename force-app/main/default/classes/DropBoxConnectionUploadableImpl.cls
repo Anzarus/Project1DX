@@ -4,6 +4,13 @@
 
 public with sharing class DropBoxConnectionUploadableImpl implements DropBoxConnectionUploadable {
 
+    private String uploadFileEndpoint = 'callout:DropBoxUploadFile{0}';
+    private String uploadParams =
+            '\"path\": \"{0}\",' +
+                    '\"mode\": \"{1}\",' +
+                    '\"autorename\": {2},' +
+                    '\"mute\": {3},' +
+                    '\"strict_conflict\": {4}';
     private DropBoxConnection dropBoxConnection;
 
     public DropBoxConnectionUploadableImpl(DropBoxConnection dropBoxConnection){
@@ -14,14 +21,33 @@ public with sharing class DropBoxConnectionUploadableImpl implements DropBoxConn
         return dropBoxConnection.getDownloadLink(fileId);
     }
 
-    public String uploadFile(String fileId, Blob fileContent) {
-        String responseBody =  dropBoxConnection.uploadFile(fileId, fileContent);
-        return getFileId(responseBody);
+    public String uploadFile(String filePath, Blob fileContent) {
+        HttpRequest request = new HttpRequest();
+        Http http = new Http();
+
+        request.setEndpoint(String.format(uploadFileEndpoint, new List<Object>{
+                '/upload'
+        }));
+        request.setMethod('POST');
+        request.setHeader('Dropbox-API-Arg',
+                '{' +
+                        String.format(uploadParams, new List<Object>{
+                                filePath, 'add', true, false, false
+                        })
+                        + '}');
+        request.setHeader('Content-Type', 'application/octet-stream');
+        request.setBodyAsBlob(fileContent);
+
+        HttpResponse response = http.send(request);
+
+        if (response.getStatusCode() == 200) {
+            Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(response.getBody());
+            return String.valueOf(result.get('path_display'));
+        }
+        throw new DropBoxConnectionException(response.getBody());
     }
 
-    private String getFileId(String responseBody){
-        Map<String, Object> result = (Map<String, Object>) JSON.deserializeUntyped(responseBody);
-        String resultPath = String.valueOf(result.get('path_display'));
-        return resultPath;
+    @TestVisible
+    private class DropBoxConnectionException extends Exception {
     }
 }

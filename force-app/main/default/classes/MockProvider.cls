@@ -37,11 +37,7 @@ public class MockProvider implements System.StubProvider {
         } else if (stubbedMethodName == 'uploadFile') {
             if (listOfArgs[0].equals('/Document.docx') &&
                     EncodingUtil.base64Encode((Blob) listOfArgs[1]).equals(EncodingUtil.base64Encode(Blob.valueOf('content')))) {
-                return '{' +
-                        '"name": "Document.docx",' +
-                        '"size": 7212,' +
-                        '"path_display": "/Document.docx"' +
-                        '}';
+                return '/Document.docx';
             }
             return null;
         } else {
